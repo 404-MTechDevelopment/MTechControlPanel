@@ -6,7 +6,28 @@ import AppMenuItem from './AppMenuItem.vue';
 const model = ref([
     {
         label: 'Home',
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+        items: [
+            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
+        ]
+    },
+    {
+        label: 'Персонал',
+        items: [
+            { label: 'Список персонала', icon: 'pi pi-fw pi-home', to: '/crew' },
+            { label: 'Список персонала TEST', icon: 'pi pi-fw pi-home', to: '/crew-test' },
+        ]
+    },
+    {
+        label: 'Сайт',
+        items: [
+            { label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' },
+        ]
+    },
+    {
+        label: 'Home-old',
+        items: [
+            { label: 'Dashboard-old', icon: 'pi pi-fw pi-home', to: '/uikit/dashboard' }
+        ]
     },
     {
         label: 'UI Components',
@@ -117,22 +138,6 @@ const model = ref([
                         items: [{ label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' }]
                     }
                 ]
-            }
-        ]
-    },
-    {
-        label: 'Get Started',
-        items: [
-            {
-                label: 'Documentation',
-                icon: 'pi pi-fw pi-book',
-                to: '/documentation'
-            },
-            {
-                label: 'View Source',
-                icon: 'pi pi-fw pi-github',
-                url: 'https://github.com/primefaces/sakai-vue',
-                target: '_blank'
             }
         ]
     }

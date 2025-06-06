@@ -13,6 +13,36 @@ const router = createRouter({
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue')
                 },
+
+                {
+                    path: '/crew',
+                    name: 'crew',
+                    component: () => import('@/views/pages/crew/Crew.vue')
+                },
+                {
+                    path: '/crew-test',
+                    name: 'crew-test',
+                    component: () => import('@/views/pages/crew/CrewTest.vue')
+                },
+
+                {
+                    path: '/imgur',
+                    name: 'imgur',
+                    component: () => import('@/views/pages/imgur/Imgur.vue')
+                },
+
+                {
+                    path: '/support/view-stats/:uuid',
+                    name: 'support-view-stats',
+                    component: () => import('@/views/pages/support/ViewStats.vue'),
+                    props: true
+                },
+
+                {
+                    path: '/uikit/dashboard',
+                    name: 'dashboard_old',
+                    component: () => import('@/views/Dashboard-old.vue')
+                },
                 {
                     path: '/uikit/formlayout',
                     name: 'formlayout',
@@ -131,6 +161,11 @@ const router = createRouter({
             path: '/auth/error',
             name: 'error',
             component: () => import('@/views/pages/auth/Error.vue')
+        },
+        {
+            path: '/:pathMatch(.*)*',
+            name: 'catchAll',
+            component: () => import('@/views/pages/NotFound.vue')
         }
     ]
 });
