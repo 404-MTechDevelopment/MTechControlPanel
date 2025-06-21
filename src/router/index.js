@@ -32,9 +32,9 @@ const router = createRouter({
                 },
 
                 {
-                    path: '/support/view-stats/:uuid',
-                    name: 'support-view-stats',
-                    component: () => import('@/views/pages/support/ViewStats.vue'),
+                    path: '/support/view-system-info/:uuid',
+                    name: 'support-view-system-info',
+                    component: () => import('@/views/pages/support/ViewSystemInfo.vue'),
                     props: true
                 },
 
