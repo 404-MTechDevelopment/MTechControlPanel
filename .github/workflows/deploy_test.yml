@@ -3,7 +3,7 @@ name: Build and Deploy testCP FrontEnd
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
   contents: write
