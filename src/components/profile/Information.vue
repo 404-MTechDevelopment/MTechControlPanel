@@ -264,7 +264,7 @@ function saveAll() {
     display: flex
     flex-direction: row
     margin-bottom: 10px
-    align-items: flex-start
+    align-items: center
     position: relative
 
     i
