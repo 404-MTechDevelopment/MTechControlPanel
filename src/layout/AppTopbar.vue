@@ -9,7 +9,6 @@ const checkAuth = ref(null)
 
 onMounted(async () => {
     checkAuth.value = await checkAuthApi()
-    console.log('checkAuthApi result:', checkAuth.value)
 })
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
@@ -79,7 +78,7 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action">
-                        <img style="border-radius: 25%" :src="getHeadLink(checkAuth)" alt="Head" class="layout-topbar-avatar" />
+                        <img style="border-radius: 25%" v-if="checkAuth?.username" :src="getHeadLink(checkAuth.username)" alt="Head" class="layout-topbar-avatar" />
                     </button>
                 </div>
             </div>
