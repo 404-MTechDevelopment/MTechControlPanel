@@ -1,6 +1,13 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
+import { checkAuthApi } from '@/api/getUserInfo';
+import { onMounted } from 'vue';
+import { getHeadLink } from '@/api/getHeadLink';
+
+onMounted(async () => {
+    const checkAuth = await checkAuthApi();
+});
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 </script>
@@ -30,7 +37,7 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                     </g>
                 </svg>
 
-                <span>SAKAI</span>
+                <span>Nahon</span>
             </router-link>
         </div>
 
@@ -69,8 +76,7 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                        <img style="border-radius: 25%" :src="getHeadLink(checkAuthApi.username)" alt="Head" class="layout-topbar-avatar" />
                     </button>
                 </div>
             </div>

@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core'
 import axios from 'axios'
 import router from '@/router';
+import { getHeadLink } from '@/api/getHeadLink';
+
 
 const query = ref('')
 const results = ref([])
@@ -52,16 +54,18 @@ function openUserProfile(nickname) {
                 @blur="isFocused = false"
                 @input="fetchResults"
                 type="text"
-                placeholder="Поиск пользователей..."
+                placeholder="Поиск игроков..."
                 class="search-input"
                 autocomplete="off"
                 spellcheck="false"
             />
             <transition-group name="list-fade" tag="ul" v-if="showDropdown && results.length" class="results-dropdown">
                 <li v-for="user in results" :key="user.uuid" class="result-item" @click="openUserProfile(user.username)">
+                    <img style="border-radius: 25%" :src="getHeadLink(user.username)" alt="User Avatar" class="user-avatar" />
                     <span class="username">{{ user.username }}</span>
                     <span class="email">{{ user.email }}</span>
                 </li>
+
             </transition-group>
             <transition-group name="list-fade" tag="ul" v-else class="results-dropdown" v-if="!loading && query.length !== 0 && isFocused">
                 <li class="result-item">
@@ -100,7 +104,7 @@ function openUserProfile(nickname) {
     left: 0;
     right: 0;
     margin-top: 0.5rem;
-    max-height: 300px;
+    max-height: 550px;
     overflow-y: auto;
     background: #09090B;
     border: 1px solid #575757;
@@ -118,11 +122,16 @@ h1 {
 }
 .result-item {
     display: flex;
-    justify-content: space-between;
     padding: 0.75rem 1rem;
     cursor: pointer;
     border-bottom: 1px solid #575757;
     transition: background 0.2s;
+    align-items: center;
+    font-size: 1.5rem;
+    .username {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
 }
 .result-item:last-child {
     border-bottom: none;

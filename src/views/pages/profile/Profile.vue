@@ -4,7 +4,7 @@
         <div v-else>
             <div v-if="userExists">
                 <div class="player-info">
-                    <img :src="getHeadLink" alt="head" />
+                    <img :src="headLink" alt="head" />
                     <h1 class="nickname">{{ nickname }}</h1>
                 </div>
 
@@ -34,7 +34,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import Information from '@/components/profile/Information.vue'
@@ -44,21 +44,20 @@ import TwoFactorAuth from '@/components/profile/2FA.vue'
 import Logs from '@/components/profile/Logs.vue'
 import Cart from '@/components/profile/Cart.vue'
 import Referrals from '@/components/profile/Referal.vue'
-import { getUserInfo } from '@/api/getUsetInfo'
+import { getUserInfo } from '@/api/getUserInfo'
 import { useToast } from 'primevue/usetoast'
+import { getHeadLink } from '@/api/getHeadLink'
 
 const route = useRoute()
 const toast = useToast()
 
 const nickname = computed(() => route.params.nickname || '')
+const headLink = computed(() => getHeadLink(nickname.value))
 const show = ref('info')
 const loading = ref(false)
 const userExists = ref(false)
 const userInfo = ref(null)
 
-const getHeadLink = computed(() =>
-    `https://mcskill.net/MineCraft/?name=${nickname.value}&mode=5&fx=43&fy=43`
-)
 
 watchEffect(async () => {
     if (!nickname.value) {

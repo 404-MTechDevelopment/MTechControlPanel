@@ -122,7 +122,7 @@ import UserHistory from '@/components/profile/UserHistory.vue'
 import { useToast } from 'primevue/usetoast';
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { getUserInfo } from '@/api/getUsetInfo';
+import { getUserInfo } from '@/api/getUserInfo';
 
 const route = useRoute()
 const toast = useToast()
