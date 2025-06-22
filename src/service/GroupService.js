@@ -19,17 +19,26 @@ export const GroupService = {
         }
     },
 
+    async getPermissionsTree() {
+        console.log('Fetching permissions tree');
+        try {
+            const res = await axios.get(`${config.baseURL}/permissions/tree`);
+            return res.data;
+        } catch (err) {
+            console.error('getPermissionsTree error:', err);
+            throw err;
+        }
+    },
+
     async saveGroup(group) {
         console.log('Saving Group:', group);
         try {
-            // Ensure all required fields are present
             const groupData = {
                 _id: group._id,
                 title: group.title,
                 priority: group.priority || 0,
                 permissions: group.permissions || []
             };
-
             const res = await axios.post(`${config.baseURL}/groups/save`, { group: groupData });
             console.log('saveGroup response:', res);
             return res.data;
@@ -56,4 +65,3 @@ export const GroupService = {
         }
     }
 };
-

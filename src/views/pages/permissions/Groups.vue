@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import DataTable from 'primevue/datatable';
@@ -9,40 +9,76 @@ import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
+import Tree from 'primevue/tree';
 import { GroupService } from '@/service/GroupService';
 
 const toast = useToast();
 const confirm = useConfirm();
 const groups = ref([]);
 const isDialogVisible = ref(false);
-const editingGroup = ref({ _id: '', title: '', priority: 0, permissions: [] });
-
-// Default sorting state
+const editingGroup = reactive({ _id: '', title: '', priority: 0, permissions: [] });
+const permissionsTree = ref([]);
+const permissionSelection = ref({});
 const sortField = ref('priority');
 const sortOrder = ref(-1);
 
-onMounted(async () => {
+const notify = (severity, summary, detail) => {
+    toast.add({ severity, summary, detail, life: 2000 });
+};
+
+function mapPermissionNodes(nodes) {
+    return nodes.map((n) => ({
+        key: n.key,
+        label: n.displayName,
+        children: n.children ? mapPermissionNodes(n.children) : []
+    }));
+}
+
+function flattenKeys(nodes) {
+    let keys = [];
+    for (let node of nodes) {
+        keys.push(node.key);
+        if (node.children && node.children.length) {
+            keys = keys.concat(flattenKeys(node.children));
+        }
+    }
+    return keys;
+}
+
+function hasParentNode(permissions, nodeKey) {
+    return permissions.some(p => p.node === nodeKey ||
+        (p.node.endsWith('.*') && nodeKey.startsWith(p.node.replace('.*', ''))));
+}
+
+async function loadGroups() {
     try {
         const data = await GroupService.getGroups();
-        // Сортировка по убыванию приоритета по умолчанию
         groups.value = data.sort((a, b) => b.priority - a.priority);
     } catch (err) {
-        console.error('Error loading groups:', err);
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось загрузить группы' });
+        console.error(err);
+        notify('error', 'Ошибка', 'Не удалось загрузить группы');
     }
-});
+}
+
+async function loadPermissionsTree() {
+    try {
+        const tree = await GroupService.getPermissionsTree();
+        permissionsTree.value = mapPermissionNodes([tree]);
+    } catch (err) {
+        console.error(err);
+        notify('error', 'Ошибка', 'Не удалось загрузить список прав');
+    }
+}
 
 async function saveOrder() {
     const total = groups.value.length;
-    groups.value.forEach((group, idx) => {
-        group.priority = total - idx;
-    });
+    groups.value.forEach((g, i) => (g.priority = total - i));
     try {
-        await Promise.all(groups.value.map(g => GroupService.saveGroup(g)));
-        toast.add({ severity: 'success', summary: 'Сохранено', detail: 'Порядок групп обновлён', life: 2000 });
+        await Promise.all(groups.value.map(GroupService.saveGroup));
+        notify('success', 'Сохранено', 'Порядок групп обновлён');
     } catch (err) {
-        console.error('Error saving order:', err);
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сохранить порядок' });
+        console.error(err);
+        notify('error', 'Ошибка', 'Не удалось сохранить порядок');
     }
 }
 
@@ -60,62 +96,143 @@ function handleDragOver(event) {
     event.preventDefault();
 }
 
-function openEditDialog(group) {
-    editingGroup.value = {
-        _id: group._id,
-        title: group.title,
-        priority: group.priority || 0,
-        permissions: group.permissions || []
-    };
-    isDialogVisible.value = true;
-}
-
-async function saveGroup() {
-    try {
-        await GroupService.saveGroup({ ...editingGroup.value });
-        const idx = groups.value.findIndex(g => g._id === editingGroup.value._id);
-        if (idx !== -1) {
-            groups.value[idx].title = editingGroup.value.title;
-            groups.value[idx].priority = editingGroup.value.priority;
-            groups.value[idx].permissions = editingGroup.value.permissions;
+function markPartialChecks() {
+    for (const key in permissionSelection.value) {
+        if (permissionSelection.value[key].checked) continue;
+        const childKeys = Object.keys(permissionSelection.value).filter(k => k.startsWith(key + '.'));
+        const checkedChildren = childKeys.filter(k => permissionSelection.value[k]?.checked);
+        if (checkedChildren.length > 0) {
+            permissionSelection.value[key].partialChecked = true;
         }
-        toast.add({ severity: 'success', summary: 'Сохранено', detail: 'Группа обновлена', life: 2000 });
-        isDialogVisible.value = false;
-    } catch (err) {
-        console.error('Error saving group:', err);
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сохранить группу' });
     }
 }
 
-async function confirmDelete(event, group) {
+function setPartialChecksFromTree(nodes) {
+    for (const node of nodes) {
+        const children = node.children || [];
+
+        if (children.length > 0) {
+            setPartialChecksFromTree(children);
+
+            const childKeys = flattenKeys(children);
+            const checked = childKeys.filter(k => permissionSelection.value[k]?.checked);
+            if (checked.length > 0 && checked.length < childKeys.length) {
+                permissionSelection.value[node.key].partialChecked = true;
+            } else if (checked.length === childKeys.length) {
+                permissionSelection.value[node.key].checked = true;
+                permissionSelection.value[node.key].partialChecked = false;
+            }
+        }
+    }
+}
+
+function openEditDialog(group) {
+    Object.assign(editingGroup, {
+        _id: group._id,
+        title: group.title,
+        priority: group.priority,
+        permissions: group.permissions || []
+    });
+
+    permissionSelection.value = {};
+
+    const allNodes = flattenKeys(permissionsTree.value);
+    const permNodes = editingGroup.permissions.map(p => p.node);
+
+    if (permNodes.includes('*')) {
+        allNodes.forEach(nodeKey => {
+            permissionSelection.value[nodeKey] = { checked: true, partialChecked: false };
+        });
+    } else {
+        allNodes.forEach(nodeKey => {
+            const isSelected = hasParentNode(editingGroup.permissions, nodeKey);
+            permissionSelection.value[nodeKey] = { checked: isSelected, partialChecked: false };
+        });
+        setPartialChecksFromTree(permissionsTree.value);
+    }
+
+    isDialogVisible.value = true;
+}
+
+function onPermissionChange(event) {
+    permissionSelection.value = event.selectionKeys;
+}
+
+async function saveGroup() {
+    const optimizedPermissions = [];
+    const allSelectedKeys = Object.entries(permissionSelection.value)
+        .filter(([key, value]) => value.checked)
+        .map(([key]) => key);
+
+    if (allSelectedKeys.includes('*')) {
+        optimizedPermissions.push({ node: '*', context: '.*' });
+    } else {
+        const parentNodes = new Set();
+
+        allSelectedKeys.forEach(key => {
+            let isCovered = false;
+            for (const parent of parentNodes) {
+                if (key.startsWith(parent.replace('.*', ''))) {
+                    isCovered = true;
+                    break;
+                }
+            }
+            if (!isCovered) {
+                const isParent = allSelectedKeys.some(k => k !== key && k.startsWith(key.replace('.*', '')));
+                if (isParent) {
+                    parentNodes.add(key.endsWith('.*') ? key : key + '.*');
+                } else {
+                    parentNodes.add(key);
+                }
+            }
+        });
+
+        parentNodes.forEach(node => {
+            optimizedPermissions.push({ node, context: '.*' });
+        });
+    }
+
+    editingGroup.permissions = optimizedPermissions;
+
+    try {
+        await GroupService.saveGroup({ ...editingGroup });
+        const idx = groups.value.findIndex((g) => g._id === editingGroup._id);
+        if (idx > -1) {
+            Object.assign(groups.value[idx], editingGroup);
+        }
+        notify('success', 'Сохранено', 'Группа обновлена');
+        isDialogVisible.value = false;
+    } catch (err) {
+        console.error(err);
+        notify('error', 'Ошибка', 'Не удалось сохранить группу');
+    }
+}
+
+function confirmDelete(event, group) {
     confirm.require({
         target: event.currentTarget,
-        message: `Вы уверены, что хотите удалить группу "${group.title}"?`,
+        message: `Вы уверены, что удалить «${group.title}»?`,
         icon: 'pi pi-exclamation-triangle',
-        rejectProps: {
-            label: 'Отмена',
-            severity: 'secondary',
-            outlined: true
-        },
-        acceptProps: {
-            label: 'Удалить',
-            severity: 'danger'
-        },
+        acceptLabel: 'Удалить',
+        rejectLabel: 'Отмена',
+        acceptSeverity: 'danger',
+        rejectSeverity: 'secondary',
         accept: async () => {
             try {
                 await GroupService.deleteGroup(group._id);
-                groups.value = groups.value.filter(g => g._id !== group._id);
-                toast.add({ severity: 'success', summary: 'Успех', detail: 'Группа удалена', life: 2000 });
+                groups.value = groups.value.filter((g) => g._id !== group._id);
+                notify('success', 'Успех', 'Группа удалена');
             } catch (err) {
-                console.error('Error deleting group:', err);
-                toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить группу' });
+                console.error(err);
+                notify('error', 'Ошибка', 'Не удалось удалить группу');
             }
-        },
-        reject: () => {
-            toast.add({ severity: 'info', summary: 'Отмена', detail: 'Удаление отменено', life: 2000 });
         }
     });
 }
+
+onMounted(async () => {
+    await Promise.all([loadGroups(), loadPermissionsTree()]);
+});
 </script>
 
 <template>
@@ -133,7 +250,7 @@ async function confirmDelete(event, group) {
             responsiveLayout="scroll"
             class="p-datatable-sm"
         >
-            <Column rowReorder header="Порядок" headerStyle="width: 4rem; min-width: 4rem" bodyStyle="text-align:center">
+            <Column rowReorder headerStyle="width:4rem" bodyStyle="text-align:center">
                 <template #body="{ data }">
                     <div
                         draggable="true"
@@ -141,27 +258,26 @@ async function confirmDelete(event, group) {
                         @dragover="handleDragOver"
                         class="drag-handle"
                     >
-                        <i class="pi pi-bars"></i>
+                        <i class="pi pi-bars" title="Перетащите" />
                     </div>
                 </template>
             </Column>
 
-            <Column field="priority" header="Приоритет" sortable headerStyle="width: 5rem" />
+            <Column field="priority" header="Приоритет" sortable headerStyle="width:5rem" />
             <Column field="title" header="Название" sortable />
             <Column field="_id" header="ID" sortable />
-            <Column header="Действия" bodyStyle="text-align:center; width: 8rem">
+
+            <Column header="Действия" bodyStyle="text-align:center; width:8rem">
                 <template #body="{ data }">
                     <Button
                         icon="pi pi-pencil"
                         class="p-button-rounded p-button-text p-button-sm mr-2"
                         @click="openEditDialog(data)"
-                        v-tooltip.top="'Редактировать группу'"
                     />
                     <Button
                         icon="pi pi-trash"
                         class="p-button-rounded p-button-text p-button-danger p-button-sm"
                         @click="confirmDelete($event, data)"
-                        v-tooltip.top="'Удалить группу'"
                     />
                 </template>
             </Column>
@@ -177,42 +293,41 @@ async function confirmDelete(event, group) {
         >
             <div class="formgrid grid">
                 <div class="field col-12">
-                    <label for="group-id" class="font-semibold text-900">ID группы</label>
-                    <InputText
-                        id="group-id"
-                        v-model="editingGroup._id"
-                        disabled
-                        class="mt-2"
-                    />
+                    <label>ID группы</label>
+                    <InputText v-model="editingGroup._id" disabled class="mt-2" />
                 </div>
-
                 <div class="field col-12">
-                    <label for="group-title" class="font-semibold text-900">Название группы</label>
-                    <InputText
-                        id="group-title"
-                        v-model="editingGroup.title"
-                        placeholder="Введите название группы"
-                        class="mt-2"
+                    <label>Название группы</label>
+                    <InputText v-model="editingGroup.title" placeholder="Введите название" class="mt-2" />
+                </div>
+                <div class="field col-12">
+                    <label>Права</label>
+                    <Tree
+                        :value="permissionsTree"
+                        dataKey="key"
+                        selectionMode="checkbox"
+                        v-model:selectionKeys="permissionSelection"
+                        :propagateSelectionDown="true"
+                        :propagateSelectionUp="true"
+                        @selection-change="onPermissionChange"
+                        class="permissions-tree"
                     />
                 </div>
             </div>
-
             <template #footer>
-                <div class="flex justify-content-end gap-2">
-                    <Button
-                        label="Отменить"
-                        icon="pi pi-times"
-                        severity="secondary"
-                        outlined
-                        @click="isDialogVisible = false"
-                    />
-                    <Button
-                        label="Сохранить"
-                        icon="pi pi-check"
-                        severity="primary"
-                        @click="saveGroup"
-                    />
-                </div>
+                <Button
+                    label="Отменить"
+                    icon="pi pi-times"
+                    severity="secondary"
+                    outlined
+                    @click="isDialogVisible = false"
+                />
+                <Button
+                    label="Сохранить"
+                    icon="pi pi-check"
+                    severity="primary"
+                    @click="saveGroup"
+                />
             </template>
         </Dialog>
     </div>
@@ -224,10 +339,7 @@ async function confirmDelete(event, group) {
     user-select: none;
     padding: 0.5rem;
     display: inline-block;
-    color: #6c757d;
-    transition: color 0.2s;
 }
-
 .drag-handle:hover {
     color: #495057;
 }
@@ -236,96 +348,48 @@ async function confirmDelete(event, group) {
     cursor: grabbing;
 }
 
-.p-datatable-tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 1rem;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-}
-
-:deep(.p-dialog .p-dialog-header) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 6px 6px 0 0;
-}
-
-:deep(.p-dialog .p-dialog-header .p-dialog-title) {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-:deep(.p-dialog .p-dialog-content) {
-    padding: 2rem;
-    background: #ffffff;
-}
-
-:deep(.p-dialog .p-dialog-footer) {
-    padding: 1.5rem 2rem;
-    background: #f8f9fa;
-    border-radius: 0 0 6px 6px;
-}
-
-/* Стили для полей формы */
-.field {
-    margin-bottom: 1.5rem;
-}
-
-.field:last-child {
-    margin-bottom: 0;
-}
-
-.field label {
-    display: block;
-    margin-bottom: 0;
-    color: #374151;
-    font-size: 0.875rem;
-}
-
-:deep(.p-inputtext) {
+.permissions-tree {
+    max-height: 300px;
+    overflow: auto;
+    margin-top: 0.5rem;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
     border-radius: 6px;
-    border: 1px solid #d1d5db;
     padding: 0.75rem;
-    font-size: 0.875rem;
-    transition: all 0.2s;
 }
 
-:deep(.p-inputtext:enabled:focus) {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.permissions-tree .p-tree .p-treenode-children {
+    margin-left: 1.5rem;
 }
 
-:deep(.p-inputtext:disabled) {
-    color: #6b7280;
+.permissions-tree .p-tree .p-treenode .p-treenode-content {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
 }
 
-/* Стили для кнопок */
+.permissions-tree .p-tree .p-treenode-toggler {
+    width: 1em;
+    text-align: center;
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.permissions-tree .p-tree .p-checkbox {
+    margin-right: 0.5rem;
+}
+
+.permissions-tree .p-tree .p-treenode .p-treenode-content:hover {
+    background: var(--surface-hover);
+    border-radius: 4px;
+}
+
+:deep(.permissions-tree .p-tree .p-treenode .p-treenode-content.p-highlight) {
+    background: var(--surface-card) !important;
+}
+
 :deep(.p-button) {
-    border-radius: 6px;
-    font-weight: 500;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.2s;
-}
-
-:deep(.p-button-sm) {
-    padding: 0.5rem;
-    font-size: 0.875rem;
-}
-
-:deep(.p-button:enabled:hover) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Анимация для тостов */
-:deep(.p-toast .p-toast-message) {
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 50%;
 }
 </style>
-
