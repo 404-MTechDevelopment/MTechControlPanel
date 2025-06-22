@@ -11,7 +11,6 @@ const showDropdown = ref(false)
 const fetchResults = useDebounceFn(async () => {
     console.log('fetchResults triggered, query:', query.value)
     if (!query.value.trim()) {
-        console.log('Empty query, clearing results')
         results.value = []
         showDropdown.value = false
         return
@@ -20,12 +19,11 @@ const fetchResults = useDebounceFn(async () => {
     try {
         const res = await axios.post('https://test.nahon.top/api/users/search', { query: query.value })
         console.log('Response data:', res.data)
-        if (Array.isArray(res.data)) {
-            results.value = res.data.slice(0, 50)
+        if (res.data.success && Array.isArray(res.data.result)) {
+            results.value = res.data.result.slice(0, 50)
             showDropdown.value = results.value.length > 0
             console.log('Results updated:', results.value.length)
         } else {
-            console.warn('Response data is not an array:', res.data)
             results.value = []
             showDropdown.value = false
         }
@@ -49,16 +47,12 @@ const fetchResults = useDebounceFn(async () => {
             autocomplete="off"
             spellcheck="false"
         />
-        <transition name="fade">
-            <div v-if="showDropdown && results.length" class="results-dropdown">
-                <ul>
-                    <li v-for="user in results" :key="user.id" class="result-item">
-                        <span class="username">{{ user.username }}</span>
-                        <span class="email">{{ user.email }}</span>
-                    </li>
-                </ul>
-            </div>
-        </transition>
+        <transition-group name="list-fade" tag="ul" v-if="showDropdown && results.length" class="results-dropdown">
+            <li v-for="user in results" :key="user.uuid" class="result-item">
+                <span class="username">{{ user.username }}</span>
+                <span class="email">{{ user.email }}</span>
+            </li>
+        </transition-group>
     </div>
 </template>
 
@@ -96,13 +90,19 @@ const fetchResults = useDebounceFn(async () => {
     border-radius: 8px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     z-index: 10;
+    padding: 0;
+    list-style: none;
 }
 .result-item {
     display: flex;
     justify-content: space-between;
     padding: 0.75rem 1rem;
     cursor: pointer;
+    border-bottom: 1px solid #eee;
     transition: background 0.2s;
+}
+.result-item:last-child {
+    border-bottom: none;
 }
 .result-item:hover {
     background: #f5f5f5;
@@ -114,10 +114,15 @@ const fetchResults = useDebounceFn(async () => {
     color: #666;
     font-size: 0.875rem;
 }
-.fade-enter-active, .fade-leave-active {
-    transition: opacity 0.25s ease;
+.list-fade-enter-active, .list-fade-leave-active {
+    transition: all 0.3s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.list-fade-enter-from {
     opacity: 0;
+    transform: translateY(-10px);
+}
+.list-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 </style>
