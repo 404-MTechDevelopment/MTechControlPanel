@@ -317,7 +317,7 @@ onMounted(async () => {
             <Button
                 label="Создать группу"
                 icon="pi pi-plus"
-                severity="success"
+                severity="primary"
                 @click="openCreateDialog"
             />
         </div>
