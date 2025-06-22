@@ -141,6 +141,18 @@ const router = createRouter({
                     component: () => import('@/views/pages/Documentation.vue')
                 },
                 {
+                    path: '/profile/:nickname',
+                    redirect: to => {
+                        return {
+                            name: 'profile',
+                            params: {
+                                nickname: to.params.nickname,
+                                tab: 'info'
+                            }
+                        }
+                    }
+                },
+                {
                     path: '/profile/:nickname/:tab',
                     name: 'profile',
                     component: () => import('@/views/pages/profile/Profile.vue'),
