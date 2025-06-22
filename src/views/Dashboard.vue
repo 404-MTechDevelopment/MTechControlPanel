@@ -9,7 +9,9 @@ const loading = ref(false)
 const showDropdown = ref(false)
 
 const fetchResults = useDebounceFn(async () => {
-    if (!query.value) {
+    console.log('fetchResults triggered, query:', query.value)
+    if (!query.value.trim()) {
+        console.log('Empty query, clearing results')
         results.value = []
         showDropdown.value = false
         return
@@ -17,9 +19,18 @@ const fetchResults = useDebounceFn(async () => {
     loading.value = true
     try {
         const res = await axios.post('https://test.nahon.top/api/users/search', { query: query.value })
-        results.value = res.data.slice(0, 50)
-        showDropdown.value = true
-    } catch {
+        console.log('Response data:', res.data)
+        if (Array.isArray(res.data)) {
+            results.value = res.data.slice(0, 50)
+            showDropdown.value = results.value.length > 0
+            console.log('Results updated:', results.value.length)
+        } else {
+            console.warn('Response data is not an array:', res.data)
+            results.value = []
+            showDropdown.value = false
+        }
+    } catch (error) {
+        console.error('API request failed:', error)
         results.value = []
         showDropdown.value = false
     }
@@ -35,6 +46,8 @@ const fetchResults = useDebounceFn(async () => {
             type="text"
             placeholder="Поиск пользователей..."
             class="search-input"
+            autocomplete="off"
+            spellcheck="false"
         />
         <transition name="fade">
             <div v-if="showDropdown && results.length" class="results-dropdown">
