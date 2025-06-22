@@ -14,7 +14,6 @@ export const getUserInfo = async (username) => {
 export async function checkAuthApi() {
     try {
         const { data } = await axios.get('/api/auth/check')
-        console.log(data)
         return data?.username ? data : null
     } catch (error) {
         console.error('Error in checkAuthApi:', error)

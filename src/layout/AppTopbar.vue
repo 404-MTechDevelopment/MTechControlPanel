@@ -2,12 +2,14 @@
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
 import { checkAuthApi } from '@/api/getUserInfo';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { getHeadLink } from '@/api/getHeadLink';
 
+const checkAuth = ref(null)
+
 onMounted(async () => {
-    const checkAuth = await checkAuthApi();
-});
+    checkAuth.value = await checkAuthApi()
+})
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 </script>
@@ -76,7 +78,7 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action">
-                        <img style="border-radius: 25%" :src="getHeadLink(checkAuthApi.username)" alt="Head" class="layout-topbar-avatar" />
+                        <img style="border-radius: 25%" :src="getHeadLink(checkAuth)" alt="Head" class="layout-topbar-avatar" />
                     </button>
                 </div>
             </div>
