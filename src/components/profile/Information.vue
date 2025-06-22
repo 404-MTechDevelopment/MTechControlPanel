@@ -12,14 +12,14 @@
                     <i class="pi pi-user" />
                     <div class="id_id-text">
                         <p class="id-text">Никнейм игрока:</p>
-                        <p class="id">{{ id }}</p>
+                        <p class="id">{{ nickname }}</p>
                     </div>
                 </div>
                 <div class="info-block">
                     <i class="pi pi-key" />
                     <div class="id_id-text">
                         <p class="id-text">UUID игрока:</p>
-                        <p class="id">{{ uuid }}</p>
+                        <p class="id">{{ userInfo?.uuid }}</p>
                     </div>
                 </div>
                 <div class="separator"></div>
@@ -105,7 +105,7 @@
                 <i class="pi pi-envelope" />
                 <div class="id_id-text">
                     <p class="id-text">Email адрес:</p>
-                    <p class="id">{{ emailAddress ?? '-' }}</p>
+                    <p class="id">{{ userInfo?.email ?? '-' }}</p>
                 </div>
             </div>
         </div>
@@ -116,25 +116,48 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watchEffect } from 'vue';
 import InformationUserGroups from '@/components/profile/InformationUserGroups.vue'
 import UserHistory from '@/components/profile/UserHistory.vue'
 import { useToast } from 'primevue/usetoast';
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { getUserInfo } from '@/api/getUsetInfo';
 
+const route = useRoute()
 const toast = useToast()
 
-const id = 'Sashaiolh'
-const uuid = 'd1fd7efc-4ddc-47e6-9fff-08d57b2861d7'
+const nickname = computed(() => route.params.nickname || '')
+const userInfo = ref(null)
+watchEffect(async () => {
+    if (!nickname.value) {
+        userInfo.value = null
+        return
+    }
+    try {
+        userInfo.value = await getUserInfo(nickname.value)
+    } catch {
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' })
+        userInfo.value = null
+    }
+})
+function formatTimestamp(ms) {
+    if (!ms) return '-'
+    const d = new Date(ms)
+    const pad = (n) => n.toString().padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+const registerDate = computed(() => {
+    return userInfo.value ? formatTimestamp(userInfo.value.registrationTimestamp) : '-'
+})
 
 const twoFaConnectStatus = true
 const discordConnectStatus = false
 const discordID = '2872177317829'
 const forumStatus = false
 const telegramId = '12763781'
-const emailAddress = 'awjnkdjkawnkj@sakjdnj.rds'
 
 const invitedBy = 'User123'
-const registerDate = '2023-10-01 00:00:00'
 
 const data = reactive({
     depostit: -250,

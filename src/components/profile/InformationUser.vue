@@ -132,11 +132,8 @@
 <script setup>
 import InformationUserGroups from '@/components/profile/InformationUserGroups.vue';
 
-const nickname = 'User123';
 const id = 'User123';
 const uuid = 'User123';
-const popolneno = '1200₽';
-const potracheno = '950₽';
 const cases = '7';
 
 const twoFaConnectStatus = true;

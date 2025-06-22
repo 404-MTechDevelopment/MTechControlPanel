@@ -1,58 +1,42 @@
 <template>
     <div class="card">
-        <div class="player-info">
-            <img src="https://mcskill.net/MineCraft/?name=Sashaiolh&mode=5&fx=43&fy=43" alt="head">
-            <h1 class="nickname">{{ nickname }}</h1>
-        </div>
-        <div class="separator"></div>
-        <section class="navigation">
-            <button
-                :class="{ active: show === 'info' }"
-                @click="show = 'info'"
-            >Информация</button>
-            <button
-                :class="{ active: show === 'logs' }"
-                @click="show = 'logs'"
-            >Логи</button>
-            <button
-                :class="{ active: show === 'relations' }"
-                @click="show = 'relations'"
-            >Связи</button>
-            <button
-                :class="{ active: show === 'refs' }"
-                @click="show = 'refs'"
-            >Рефералы</button>
-            <button
-                :class="{ active: show === 'cart' }"
-                @click="show = 'cart'"
-            >Корзина</button>
-            <button
-                :class="{ active: show === 'vote' }"
-                @click="show = 'vote'"
-            >Голосование</button>
-            <button
-                :class="{ active: show === 'jira' }"
-                @click="show = 'jira'"
-            >Jira</button>
-            <button
-                :class="{ active: show === '2fa' }"
-                @click="show = '2fa'"
-            >2FA</button>
-        </section>
+        <div v-if="loading" class="no-user">Загрузка...</div>
+        <div v-else>
+            <div v-if="userExists">
+                <div class="player-info">
+                    <img :src="getHeadLink" alt="head" />
+                    <h1 class="nickname">{{ nickname }}</h1>
+                </div>
 
-        <Information v-if="show === 'info'" />
-        <Voting v-if="show === 'vote'" />
-        <Jira v-if="show === 'jira'" />
-        <TwoFactorAuth v-if="show === '2fa'" />
-        <Logs v-if="show === 'logs'" />
-        <Cart v-if="show === 'cart'" />
-        <Referrals v-if="show === 'refs'" />
-        <Referrals v-if="show === 'relations'" />
+                <div class="separator"></div>
+
+                <section class="navigation">
+                    <button :class="{ active: show === 'info' }" @click="show = 'info'">Информация</button>
+                    <button :class="{ active: show === 'logs' }" @click="show = 'logs'">Логи</button>
+                    <button :class="{ active: show === 'relations' }" @click="show = 'relations'">Связи</button>
+                    <button :class="{ active: show === 'refs' }" @click="show = 'refs'">Рефералы</button>
+                    <button :class="{ active: show === 'cart' }" @click="show = 'cart'">Корзина</button>
+                    <button :class="{ active: show === 'vote' }" @click="show = 'vote'">Голосование</button>
+                    <button :class="{ active: show === 'jira' }" @click="show = 'jira'">Jira</button>
+                    <button :class="{ active: show === '2fa' }" @click="show = '2fa'">2FA</button>
+                </section>
+
+                <Information v-if="show === 'info'" />
+                <Voting v-if="show === 'vote'" />
+                <Jira v-if="show === 'jira'" />
+                <TwoFactorAuth v-if="show === '2fa'" />
+                <Logs v-if="show === 'logs'" />
+                <Cart v-if="show === 'cart'" />
+                <Referrals v-if="show === 'refs' || show === 'relations'" />
+            </div>
+            <div v-else class="no-user">Пользователь не найден</div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 import Information from '@/components/profile/Information.vue'
 import Voting from '@/components/profile/Voting.vue'
 import Jira from '@/components/profile/Jira.vue'
@@ -60,9 +44,48 @@ import TwoFactorAuth from '@/components/profile/2FA.vue'
 import Logs from '@/components/profile/Logs.vue'
 import Cart from '@/components/profile/Cart.vue'
 import Referrals from '@/components/profile/Referal.vue'
+import { getUserInfo } from '@/api/getUsetInfo'
+import { useToast } from 'primevue/usetoast'
 
-const nickname = 'Sashaiolh'
+const route = useRoute()
+const toast = useToast()
+
+const nickname = computed(() => route.params.nickname || '')
 const show = ref('info')
+const loading = ref(false)
+const userExists = ref(false)
+const userInfo = ref(null)
+
+const getHeadLink = computed(() =>
+    `https://mcskill.net/MineCraft/?name=${nickname.value}&mode=5&fx=43&fy=43`
+)
+
+watchEffect(async () => {
+    if (!nickname.value) {
+        userExists.value = false
+        userInfo.value = null
+        loading.value = false
+        return
+    }
+    loading.value = true
+    try {
+        const data = await getUserInfo(nickname.value)
+        userInfo.value = data
+        userExists.value = true
+    } catch (e) {
+        if (e.response?.data?.error === 'user not found') {
+            toast.add({ severity: 'warn', summary: 'Пользователь не найден', detail: `Пользователь ${nickname.value} не найден` })
+            userExists.value = false
+            userInfo.value = null
+        } else {
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' })
+            userExists.value = false
+            userInfo.value = null
+        }
+    } finally {
+        loading.value = false
+    }
+})
 </script>
 
 <style scoped lang="sass">
@@ -100,6 +123,7 @@ const show = ref('info')
         color: #fff
         text-shadow: 0 0 5px rgba(255, 255, 255, 0.78)
         background-color: #4c4c4c
+
     button.active:hover
         color: #fff
         background-color: #5c5c5c
@@ -120,6 +144,7 @@ const show = ref('info')
         max-width: none
         padding: 10px 0
         font-size: 0.9rem
+
 .player-info
     display: flex
     align-items: center
@@ -127,9 +152,17 @@ const show = ref('info')
 
     img
         border-radius: 25%
+
     .nickname
         font-size: 1.8rem
         word-break: break-word
 
-
+.no-user
+    font-size: 1.3rem
+    color: #bbb
+    height: 78vh
+    display: flex
+    align-items: center
+    justify-content: center
+    margin: 0 auto
 </style>
