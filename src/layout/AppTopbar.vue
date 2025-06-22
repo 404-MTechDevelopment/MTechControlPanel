@@ -9,6 +9,7 @@ const checkAuth = ref(null)
 
 onMounted(async () => {
     checkAuth.value = await checkAuthApi()
+    console.log('checkAuthApi result:', checkAuth.value)
 })
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
