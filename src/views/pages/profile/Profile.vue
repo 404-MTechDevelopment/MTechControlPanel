@@ -95,11 +95,14 @@ const show = ref('info')
 
     button:hover
         color: #fff
-        background-color: #4a4a6a
 
     button.active
         color: #fff
-        background-color: #5a5a8a
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.78)
+        background-color: #4c4c4c
+    button.active:hover
+        color: #fff
+        background-color: #5c5c5c
 
 .separator
     height: 2px
