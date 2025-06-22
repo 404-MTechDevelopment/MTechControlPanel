@@ -9,18 +9,18 @@
         <div class="global-groups server">
             <div class="info-block">
                 <div class="id_id-text">
-                    <i class="pi pi-user-edit ml-1 align-middle" style="font-size: 1rem"></i><span class="text-xl font-semibold">Глобальные роли: </span>
+                    <i class="pi pi-user-edit ml-1 align-middle" style="font-size: 1rem"></i>
+                    <span class="text-xl font-semibold">Глобальные группы: </span>
 
                     <Tag
-                        v-for="innerIndex in 2"
-                        :key="innerIndex"
-                        :icon=" hoverStates[`${outerIndex}-${innerIndex}`] ? 'pi pi-times' : 'pi pi-user' "
-                        value="Куратор"
+                        v-for="(role, index) in globalRoles"
+                        :key="index"
+                        :icon="hoverStates[`g-${index}`] ? 'pi pi-times' : 'pi pi-user'"
+                        :value="role"
                         class="text-sm px-2 py-1 align-middle mr-1 mb-1 cursor-pointer"
-                        @mouseover="hoverStates[`${outerIndex}-${innerIndex}`] = true"
-                        @mouseleave="hoverStates[`${outerIndex}-${innerIndex}`] = false"
+                        @mouseover="hoverStates[`g-${index}`] = true"
+                        @mouseleave="hoverStates[`g-${index}`] = false"
                     />
-
 
                     <i class="pi pi-plus ml-1 align-middle cursor-pointer" style="font-size: 1rem"></i>
                 </div>
@@ -34,7 +34,7 @@
                     <Tag
                         v-for="(role, rIndex) in server.roles"
                         :key="rIndex"
-                        :icon=" hoverStates[`s${sIndex}-${rIndex}`] ? 'pi pi-times' : 'pi pi-user' "
+                        :icon="hoverStates[`s${sIndex}-${rIndex}`] ? 'pi pi-times' : 'pi pi-user'"
                         :value="role"
                         class="text-sm px-2 py-1 align-middle mr-1 mb-1 cursor-pointer"
                         @mouseover="hoverStates[`s${sIndex}-${rIndex}`] = true"
@@ -51,15 +51,10 @@
 import { reactive } from 'vue';
 
 const serverGroups = [
-    {
-        serverName: 'EnigmaRPG',
-        roles: ['Админ', 'Куратор']
-    },
-    {
-        serverName: 'Omicron',
-        roles: ['Модератор']
-    }
+    { serverName: 'EnigmaRPG', roles: ['Админ', 'Куратор'] },
+    { serverName: 'Omicron', roles: ['Модератор'] }
 ]
+const globalRoles = ['Куратор', 'Админ', 'Модератор', 'Партнёр', 'Проверенный'];
 
 
 const hoverStates = reactive<Record<string, boolean>>({});
