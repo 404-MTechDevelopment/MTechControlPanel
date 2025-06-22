@@ -11,14 +11,47 @@
                 <div class="separator"></div>
 
                 <section class="navigation">
-                    <button :class="{ active: show === 'info' }" @click="show = 'info'">Информация</button>
-                    <button :class="{ active: show === 'logs' }" @click="show = 'logs'">Логи</button>
-                    <button :class="{ active: show === 'relations' }" @click="show = 'relations'">Связи</button>
-                    <button :class="{ active: show === 'refs' }" @click="show = 'refs'">Рефералы</button>
-                    <button :class="{ active: show === 'cart' }" @click="show = 'cart'">Корзина</button>
-                    <button :class="{ active: show === 'vote' }" @click="show = 'vote'">Голосование</button>
-                    <button :class="{ active: show === 'jira' }" @click="show = 'jira'">Jira</button>
-                    <button :class="{ active: show === '2fa' }" @click="show = '2fa'">2FA</button>
+                    <button
+                        :class="{ active: show === 'info' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'info' } })">
+                        Информация
+                    </button>
+                    <button
+                        :class="{ active: show === 'logs' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'logs' } })">
+                        Логи
+                    </button>
+                    <button
+                        :class="{ active: show === 'relations' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'relations' } })">
+                        Связи
+                    </button>
+                    <button
+                        :class="{ active: show === 'refs' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'refs' } })">
+                        Рефералы
+                    </button>
+                    <button
+                        :class="{ active: show === 'cart' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'cart' } })">
+                        Корзина
+                    </button>
+                    <button
+                        :class="{ active: show === 'vote' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'vote' } })">
+                        Голосование
+                    </button>
+                    <button
+                        :class="{ active: show === 'jira' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'jira' } })">
+                        Jira
+                    </button>
+                    <button
+                        :class="{ active: show === '2fa' }"
+                        @click="$router.push({ name: 'profile', params: { nickname, tab: '2fa' } })">
+                        2FA
+                    </button>
+
                 </section>
 
                 <Information v-if="show === 'info'" />
@@ -47,17 +80,22 @@ import Referrals from '@/components/profile/Referal.vue'
 import { getUserInfo } from '@/api/getUserInfo'
 import { useToast } from 'primevue/usetoast'
 import { getHeadLink } from '@/api/getHeadLink'
+import { watch } from 'vue';
 
 const route = useRoute()
 const toast = useToast()
 
 const nickname = computed(() => route.params.nickname || '')
 const headLink = computed(() => getHeadLink(nickname.value))
-const show = ref('info')
 const loading = ref(false)
 const userExists = ref(false)
 const userInfo = ref(null)
 
+const show = ref(route.params.tab || 'info')
+
+watch(() => route.params.tab, (newTab) => {
+    show.value = newTab || 'info'
+})
 
 watchEffect(async () => {
     if (!nickname.value) {
