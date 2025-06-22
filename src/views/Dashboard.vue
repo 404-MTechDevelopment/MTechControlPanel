@@ -1,144 +1,110 @@
 <script setup>
 import { ref } from 'vue'
-import AutoComplete from 'primevue/autocomplete'
 import { useDebounceFn } from '@vueuse/core'
 import axios from 'axios'
 
-const search = ref('')
+const query = ref('')
 const results = ref([])
 const loading = ref(false)
+const showDropdown = ref(false)
 
-const fetchSuggestions = useDebounceFn(async (query) => {
-    if (!query) {
+const fetchResults = useDebounceFn(async () => {
+    if (!query.value) {
         results.value = []
+        showDropdown.value = false
         return
     }
     loading.value = true
     try {
-        const res = await axios.post('https://test.nahon.top/api/users/search', {
-            query: { query }
-        })
-        results.value = res.data.result
+        const res = await axios.get(`https://test.nahon.top/api/users/search?q=${query.value}`)
+        results.value = res.data.slice(0, 50)
+        showDropdown.value = true
     } catch {
         results.value = []
-    } finally {
-        loading.value = false
+        showDropdown.value = false
     }
+    loading.value = false
 }, 300)
-
-const onSearch = (event) => {
-    fetchSuggestions(event.query)
-}
 </script>
 
 <template>
     <div class="card">
-        <h1>Поиск по нику пользователя</h1>
-        <div class="search-wrapper">
-            <AutoComplete
-                v-model="search"
-                :suggestions="results"
-                @complete="onSearch"
-                optionLabel="username"
-                placeholder="Введите никнейм..."
-                :loading="loading"
-                panelClass="search-dropdown"
-                class="search-input"
-            >
-                <template #item="{ item }">
-                    <div class="search-item">
-                        <i class="pi pi-user mr-2 text-gray-500" />
-                        <div class="user-data">
-                            <div class="username">{{ item.username }}</div>
-                            <div class="email">{{ item.email }}</div>
-                        </div>
-                    </div>
-                </template>
-            </AutoComplete>
-        </div>
+        <input
+            v-model="query"
+            @input="fetchResults"
+            type="text"
+            placeholder="Поиск пользователей..."
+            class="search-input"
+        />
+        <transition name="fade">
+            <div v-if="showDropdown && results.length" class="results-dropdown">
+                <ul>
+                    <li v-for="user in results" :key="user.id" class="result-item">
+                        <span class="username">{{ user.username }}</span>
+                        <span class="email">{{ user.email }}</span>
+                    </li>
+                </ul>
+            </div>
+        </transition>
     </div>
 </template>
 
 <style scoped>
 .card {
-    height: 82vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 2rem 1rem;
-}
-h1 {
-    text-align: center;
-    margin-bottom: 1rem;
-    font-size: 2rem;
-}
-.search-wrapper {
-    display: flex;
-    justify-content: center;
+    position: relative;
+    padding: 1rem;
+    border-radius: 12px;
     width: 100%;
+    max-width: 500px;
+    margin: auto;
 }
 .search-input {
     width: 100%;
-    max-width: 900px;
-    font-size: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: border 0.3s;
 }
-.search-input :deep(.p-inputtext) {
-    height: 60px;
-    font-size: 1.3rem;
-    padding: 0 1.5rem;
-    border-radius: 12px;
+.search-input:focus {
+    outline: none;
+    border-color: #888;
 }
-.search-dropdown {
-    max-height: 400px;
+.results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    max-height: 300px;
     overflow-y: auto;
-    border-radius: 12px;
-    animation: dropdownFade 0.2s ease-out;
     background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    z-index: 10;
 }
-.search-item {
+.result-item {
     display: flex;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-    transition: background 0.2s ease;
-}
-.search-item:hover {
-    background-color: #f5f5f5;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
     cursor: pointer;
+    transition: background 0.2s;
 }
-.user-data {
-    display: flex;
-    flex-direction: column;
+.result-item:hover {
+    background: #f5f5f5;
 }
 .username {
     font-weight: 600;
-    font-size: 1.1rem;
 }
 .email {
-    font-size: 0.9rem;
-    color: #888;
+    color: #666;
+    font-size: 0.875rem;
 }
-@keyframes dropdownFade {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.25s ease;
 }
-@media (max-width: 800px) {
-    .search-input {
-        font-size: 1.2rem;
-    }
-    .search-dropdown {
-        max-height: 300px;
-    }
-}
-.p-autocomplete-loader {
-    display: none !important;
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
 }
 </style>
