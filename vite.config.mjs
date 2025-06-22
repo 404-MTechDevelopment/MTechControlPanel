@@ -16,7 +16,7 @@ export default defineConfig({
             }
         }
     },
-    base: '/cp/',
+    base: '/admin/',
     optimizeDeps: {
         noDiscovery: true
     },

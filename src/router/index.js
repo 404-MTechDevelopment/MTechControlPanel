@@ -2,7 +2,7 @@ import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
-    history: createWebHistory('/cp/'),
+    history: createWebHistory('/admin/'),
     routes: [
         {
             path: '/',
