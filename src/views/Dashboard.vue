@@ -16,7 +16,7 @@ const fetchResults = useDebounceFn(async () => {
     }
     loading.value = true
     try {
-        const res = await axios.get(`https://test.nahon.top/api/users/search?q=${query.value}`)
+        const res = await axios.post('https://test.nahon.top/api/users/search', { query: query.value })
         results.value = res.data.slice(0, 50)
         showDropdown.value = true
     } catch {
