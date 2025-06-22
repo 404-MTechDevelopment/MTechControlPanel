@@ -4,6 +4,9 @@
             <div class="identify">
                 <div class="edit-all">
                     <i class="pi pi-pencil" @click="toggleAllEdit" />
+                    <div v-if="allEditing" class="edit-actions">
+                        <i class="pi pi-sync" @click="resetAll" title="Сбросить изменения" />
+                    </div>
                 </div>
                 <div class="info-block">
                     <i class="pi pi-user" />
@@ -33,7 +36,6 @@
                                         <i class="pi pi-plus" title="Добавить к значению" @click="addToValue(item.key)" />
                                         <i class="pi pi-minus" title="Вычесть из значения" @click="subtractFromValue(item.key)" />
                                         <i class="pi pi-upload" title="Взять из значения в поле" @click="fromCurrent(item.key)" />
-                                        <i class="pi pi-times" title="Очистить поле" @click="clearField(item.key)" />
                                     </div>
                                 </template>
                                 <template v-else>
@@ -42,10 +44,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div v-if="allEditing" class="edit-actions">
-                    <i class="pi pi-sync" @click="resetAll" title="Сбросить изменения" />
-                    <i class="pi pi-check" @click="saveAll" title="Сохранить изменения" />
                 </div>
             </div>
         </div>
@@ -260,7 +258,7 @@ function saveAll() {
 
     .id
         margin: 0
-        font-size: 13px
+        font-size: 18.1855px
         color: #cccccc
 
 .main-block-1, .main-block-2
@@ -270,7 +268,7 @@ function saveAll() {
     padding: 10px
     position: relative
 
-@media (max-width: 768px)
+@media (max-width: 1120px)
     .down-main-blocks
         flex-direction: column
         gap: 15px
@@ -290,6 +288,7 @@ function saveAll() {
         align-items: center
         gap: 8px
         min-width: 180px
+        max-height: 27.28px
 
         .buttons
             display: flex
