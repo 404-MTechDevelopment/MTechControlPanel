@@ -15,6 +15,12 @@ const router = createRouter({
                 },
 
                 {
+                    path: '/groups',
+                    name: 'groups',
+                    component: () => import('@/views/pages/permissions/Groups.vue')
+                },
+
+                {
                     path: '/crew',
                     name: 'crew',
                     component: () => import('@/views/pages/crew/Crew.vue')

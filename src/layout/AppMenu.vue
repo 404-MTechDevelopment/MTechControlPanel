@@ -18,6 +18,12 @@ const model = ref([
         ]
     },
     {
+        label: 'PERMISSIONS',
+        items: [
+            { label: 'Группы', icon: 'pi pi-fw pi-user', to: '/groups' },
+        ]
+    },
+    {
         label: 'Сайт',
         items: [
             { label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' },
