@@ -18,7 +18,7 @@ const fetchSuggestions = useDebounceFn(async (query) => {
         const res = await axios.post('https://test.nahon.top/api/users/search', {
             query: { query }
         })
-        results.value = res.data.slice(0, 50)
+        results.value = res.data.result
     } catch {
         results.value = []
     } finally {
@@ -39,7 +39,7 @@ const onSearch = (event) => {
                 v-model="search"
                 :suggestions="results"
                 @complete="onSearch"
-                optionLabel="name"
+                optionLabel="username"
                 placeholder="Введите никнейм..."
                 :loading="loading"
                 panelClass="search-dropdown"
@@ -48,7 +48,10 @@ const onSearch = (event) => {
                 <template #item="{ item }">
                     <div class="search-item">
                         <i class="pi pi-user mr-2 text-gray-500" />
-                        <span>{{ item.name }}</span>
+                        <div class="user-data">
+                            <div class="username">{{ item.username }}</div>
+                            <div class="email">{{ item.email }}</div>
+                        </div>
                     </div>
                 </template>
             </AutoComplete>
@@ -57,19 +60,36 @@ const onSearch = (event) => {
 </template>
 
 <style scoped>
+.card {
+    height: 82vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2rem 1rem;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
 .search-wrapper {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding: 3rem 1rem 1rem;
     width: 100%;
 }
 .search-input {
+    width: 100%;
+    max-width: 900px;
     font-size: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
-
+.search-input :deep(.p-inputtext) {
+    height: 60px;
+    font-size: 1.3rem;
+    padding: 0 1.5rem;
+    border-radius: 12px;
+}
 .search-dropdown {
     max-height: 400px;
     overflow-y: auto;
@@ -77,20 +97,29 @@ const onSearch = (event) => {
     animation: dropdownFade 0.2s ease-out;
     background: white;
 }
-
 .search-item {
     display: flex;
     align-items: center;
     padding: 1rem;
-    font-size: 1.1rem;
     border-bottom: 1px solid #eee;
     transition: background 0.2s ease;
 }
-
 .search-item:hover {
     background-color: #f5f5f5;
+    cursor: pointer;
 }
-
+.user-data {
+    display: flex;
+    flex-direction: column;
+}
+.username {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.email {
+    font-size: 0.9rem;
+    color: #888;
+}
 @keyframes dropdownFade {
     from {
         opacity: 0;
@@ -101,27 +130,10 @@ const onSearch = (event) => {
         transform: translateY(0);
     }
 }
-.search-input :deep(.p-inputtext) {
-    width: 80%;
-    margin: 0 auto;
-}
-.p-autocomplete {
-    width: 100%;
-}
-h1 {
-    text-align: center;
-    margin-bottom: 1rem;
-    font-size: 2rem;
-}
-.card {
-    height: 82vh;
-}
 @media (max-width: 800px) {
     .search-input {
-        width: 100%;
         font-size: 1.2rem;
     }
-
     .search-dropdown {
         max-height: 300px;
     }
