@@ -30,7 +30,6 @@
                             <p class="id-text">{{ item.label }}</p>
                             <div class="value-wrapper">
                                 <template v-if="allEditing">
-                                    <!-- Редактирование доступно всегда, проверка на изменение делается отдельно -->
                                     <input v-model="editValues[item.key]" type="number" class="edit-input" placeholder="..." />
                                     <div class="buttons">
                                         <i class="pi pi-download" title="Установить это значение" @click="setToValue(item.key)" />
@@ -109,7 +108,7 @@
                 <div class="id_id-text">
                     <p class="id-text">Email адрес:</p>
                     <p class="id">
-                        {{hasFieldViewAccess("email") ? userInfo.email.value : 'Нет доступа'}}
+                        {{ hasFieldViewAccess("email") ? userInfo.email.value : 'Нет доступа' }}
                     </p>
                 </div>
             </div>
@@ -126,7 +125,9 @@ import InformationUserGroups from '@/components/profile/InformationUserGroups.vu
 import UserHistory from '@/components/profile/UserHistory.vue';
 import { useToast } from 'primevue/usetoast';
 import { useRoute } from 'vue-router';
+import axios from 'axios';
 import { getUserInfo } from '@/api/getUserInfo';
+import config from '@/config/config.json';
 
 const route = useRoute();
 const toast = useToast();
@@ -139,7 +140,7 @@ const data = reactive({
     money: 0,
     fakeMoney: 0,
     freeMoney: 0,
-    cases: 100
+    freeCases: 0
 });
 
 const editValues = reactive({
@@ -147,7 +148,7 @@ const editValues = reactive({
     money: '',
     fakeMoney: '',
     freeMoney: '',
-    cases: ''
+    freeCases: ''
 });
 const allEditing = ref(false);
 
@@ -156,7 +157,7 @@ const editableFields = [
     { key: 'money', label: 'Нахкоины', icon: 'pi pi-id-card' },
     { key: 'fakeMoney', label: 'Дебетовые Нахкоины', icon: 'pi pi-money-bill' },
     { key: 'freeMoney', label: 'Похкоины', icon: 'pi pi-pound' },
-    { key: 'cases', label: 'Кейсы', icon: 'pi pi-briefcase' }
+    { key: 'freeCases', label: 'Кейсы', icon: 'pi pi-briefcase' }
 ];
 
 watchEffect(async () => {
@@ -172,7 +173,12 @@ watchEffect(async () => {
             data.money = info.balance.value.money;
             data.fakeMoney = info.balance.value.fakeMoney;
             data.freeMoney = info.balance.value.freeMoney;
-            data.cases = info.balance.value.freeCases;
+            data.freeCases = info.balance.value.freeCases;
+        } else {
+            data.money = 0;
+            data.fakeMoney = 0;
+            data.freeMoney = 0;
+            data.freeCases = 0;
         }
         data.depostit = info?.depostit ?? 0;
     } catch {
@@ -207,20 +213,49 @@ const forumStatus = false;
 const telegramId = '12763781';
 const invitedBy = 'User123';
 
-// Только для просмотра: проверяем доступ к полю
 function hasFieldViewAccess(key) {
-    if (['money', 'fakeMoney', 'freeMoney'].includes(key)) {
+    if (['money', 'fakeMoney', 'freeMoney', 'cases'].includes(key)) {
         return userInfo.value?.balance?.access === true;
     }
-    if('email'.includes(key)) {
+    if (key === 'email') {
         return userInfo.value?.email?.access === true;
     }
     return true;
 }
-// Отображаемое значение без проверки доступа на изменение
 function displayRawValue(key) {
     const val = data[key];
     return val != null ? val : '-';
+}
+
+// Общий вызов смены баланса на сервере
+async function changeBalanceRemote(balanceType, operationType, value) {
+    if (!userInfo.value?.uuid) {
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Нет информации о пользователе' });
+        return false;
+    }
+    try {
+        const body = {
+            target: nickname.value,
+            type: balanceType,
+            operation: operationType,
+            value: value
+        };
+        const resp = await axios.post(`${config.baseURL}/admin/balance/change`, body);
+        if (resp.status === 200 && resp.data?.success) {
+            return true;
+        } else {
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось изменить баланс' });
+            return false;
+        }
+    } catch (err) {
+        if (err.response && err.response.status === 403) {
+            toast.add({ severity: 'error', summary: 'Нет прав', detail: 'Недостаточно прав для изменения баланса' });
+        } else {
+            console.error(err);
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Сетевая или серверная ошибка при изменении баланса' });
+        }
+        return false;
+    }
 }
 
 function toggleAllEdit() {
@@ -230,39 +265,48 @@ function toggleAllEdit() {
     }
 }
 
-function setToValue(key) {
+async function setToValue(key) {
     const val = parseFloat(editValues[key]);
-    if (!isNaN(val)) {
+    if (isNaN(val)) {
+        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"` });
+        return;
+    }
+    const ok = await changeBalanceRemote(key, "=", val);
+    if (ok) {
         data[key] = val;
-        toast.add({ severity: 'success', summary: 'Установлено', detail: `Значение поля "${key}" установлено`, life: 3000 });
-    } else {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 });
+        toast.add({ severity: 'success', summary: 'Успех', detail: `Значение "${key}" установлено` });
     }
 }
 
-function addToValue(key) {
+async function addToValue(key) {
     const val = parseFloat(editValues[key]);
-    if (!isNaN(val)) {
+    if (isNaN(val)) {
+        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"` });
+        return;
+    }
+    const ok = await changeBalanceRemote(key, "+", val);
+    if (ok) {
         data[key] += val;
-        toast.add({ severity: 'success', summary: 'Добавлено', detail: `К значению "${key}" добавлено ${val}`, life: 3000 });
-    } else {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 });
+        toast.add({ severity: 'success', summary: 'Успех', detail: `К "${key}" добавлено ${val}` });
     }
 }
 
-function subtractFromValue(key) {
+async function subtractFromValue(key) {
     const val = parseFloat(editValues[key]);
-    if (!isNaN(val)) {
+    if (isNaN(val)) {
+        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"` });
+        return;
+    }
+    const ok = await changeBalanceRemote(key, "-", val);
+    if (ok) {
         data[key] -= val;
-        toast.add({ severity: 'success', summary: 'Вычтено', detail: `Из значения "${key}" вычтено ${val}`, life: 3000 });
-    } else {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 });
+        toast.add({ severity: 'success', summary: 'Успех', detail: `Из "${key}" вычтено ${val}` });
     }
 }
 
 function fromCurrent(key) {
     editValues[key] = data[key];
-    toast.add({ severity: 'info', summary: 'Скопировано', detail: `Текущее значение "${key}" вставлено в поле`, life: 3000 });
+    toast.add({ severity: 'info', summary: 'Скопировано', detail: `Текущее значение "${key}" вставлено в поле` });
 }
 
 function resetAll() {
@@ -270,9 +314,13 @@ function resetAll() {
 }
 
 function saveAll() {
-    Object.keys(editValues).forEach(k => {
+    // Сохраняем все через удалённые вызовы, если нужно:
+    Object.keys(editValues).forEach(async (k) => {
         const val = parseFloat(editValues[k]);
-        if (!isNaN(val)) data[k] = val;
+        if (!isNaN(val)) {
+            const ok = await changeBalanceRemote(k, "=", val);
+            if (ok) data[k] = val;
+        }
     });
     allEditing.value = false;
 }
