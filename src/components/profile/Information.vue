@@ -30,6 +30,7 @@
                             <p class="id-text">{{ item.label }}</p>
                             <div class="value-wrapper">
                                 <template v-if="allEditing">
+                                    <!-- Редактирование доступно всегда, проверка на изменение делается отдельно -->
                                     <input v-model="editValues[item.key]" type="number" class="edit-input" placeholder="..." />
                                     <div class="buttons">
                                         <i class="pi pi-download" title="Установить это значение" @click="setToValue(item.key)" />
@@ -39,7 +40,9 @@
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <p class="id">{{ data[item.key] }}</p>
+                                    <p class="id">
+                                        {{ hasFieldViewAccess(item.key) ? displayRawValue(item.key) : 'Нет доступа' }}
+                                    </p>
                                 </template>
                             </div>
                         </div>
@@ -105,7 +108,9 @@
                 <i class="pi pi-envelope" />
                 <div class="id_id-text">
                     <p class="id-text">Email адрес:</p>
-                    <p class="id">{{ userInfo?.email ?? '-' }}</p>
+                    <p class="id">
+                        {{hasFieldViewAccess("email") ? userInfo.email.value : 'Нет доступа'}}
+                    </p>
                 </div>
             </div>
         </div>
@@ -116,132 +121,160 @@
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect } from 'vue';
-import InformationUserGroups from '@/components/profile/InformationUserGroups.vue'
-import UserHistory from '@/components/profile/UserHistory.vue'
+import { ref, reactive, watchEffect, computed } from 'vue';
+import InformationUserGroups from '@/components/profile/InformationUserGroups.vue';
+import UserHistory from '@/components/profile/UserHistory.vue';
 import { useToast } from 'primevue/usetoast';
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router';
 import { getUserInfo } from '@/api/getUserInfo';
 
-const route = useRoute()
-const toast = useToast()
+const route = useRoute();
+const toast = useToast();
 
-const nickname = computed(() => route.params.nickname || '')
-const userInfo = ref(null)
-watchEffect(async () => {
-    if (!nickname.value) {
-        userInfo.value = null
-        return
-    }
-    try {
-        userInfo.value = await getUserInfo(nickname.value)
-    } catch {
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' })
-        userInfo.value = null
-    }
-})
-function formatTimestamp(ms) {
-    if (!ms) return '-'
-    const d = new Date(ms)
-    const pad = (n) => n.toString().padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-}
-const registerDate = computed(() => {
-    return userInfo.value ? formatTimestamp(userInfo.value.registrationTimestamp) : '-'
-})
-
-const twoFaConnectStatus = true
-const discordConnectStatus = false
-const discordID = '2872177317829'
-const forumStatus = false
-const telegramId = '12763781'
-
-const invitedBy = 'User123'
+const nickname = computed(() => route.params.nickname || '');
+const userInfo = ref(null);
 
 const data = reactive({
-    depostit: -250,
-    nahcoon_real: 350,
-    nahcoin_fake: 1000,
-    pohcoin: 420,
-    cases: -7
-})
+    depostit: 0,
+    money: 0,
+    fakeMoney: 0,
+    freeMoney: 0,
+    cases: 100
+});
 
 const editValues = reactive({
     depostit: '',
-    nahcoon_real: '',
-    nahcoin_fake: '',
-    pohcoin: '',
+    money: '',
+    fakeMoney: '',
+    freeMoney: '',
     cases: ''
-})
-const allEditing = ref(false)
+});
+const allEditing = ref(false);
 
 const editableFields = [
     { key: 'depostit', label: 'Пополнено', icon: 'pi pi-credit-card' },
-    { key: 'nahcoon_real', label: 'Нахкоины', icon: 'pi pi-id-card' },
-    { key: 'nahcoin_fake', label: 'Дебетовые Нахкоины', icon: 'pi pi-money-bill' },
-    { key: 'pohcoin', label: 'Похкоины', icon: 'pi pi-pound' },
+    { key: 'money', label: 'Нахкоины', icon: 'pi pi-id-card' },
+    { key: 'fakeMoney', label: 'Дебетовые Нахкоины', icon: 'pi pi-money-bill' },
+    { key: 'freeMoney', label: 'Похкоины', icon: 'pi pi-pound' },
     { key: 'cases', label: 'Кейсы', icon: 'pi pi-briefcase' }
-]
+];
+
+watchEffect(async () => {
+    if (!nickname.value) {
+        userInfo.value = null;
+        resetDataToDefaults();
+        return;
+    }
+    try {
+        const info = await getUserInfo(nickname.value);
+        userInfo.value = info;
+        if (info && info.balance && info.balance.access && info.balance.value) {
+            data.money = info.balance.value.money;
+            data.fakeMoney = info.balance.value.fakeMoney;
+            data.freeMoney = info.balance.value.freeMoney;
+            data.cases = info.balance.value.freeCases;
+        }
+        data.depostit = info?.depostit ?? 0;
+    } catch {
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' });
+        userInfo.value = null;
+        resetDataToDefaults();
+    }
+});
+
+function resetDataToDefaults() {
+    data.depostit = 0;
+    data.money = 0;
+    data.fakeMoney = 0;
+    data.freeMoney = 0;
+    data.cases = 0;
+}
+
+function formatTimestamp(ms) {
+    if (!ms) return '-';
+    const d = new Date(ms);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+const registerDate = computed(() => {
+    return userInfo.value ? formatTimestamp(userInfo.value.registrationTimestamp) : '-';
+});
+
+const twoFaConnectStatus = true;
+const discordConnectStatus = false;
+const discordID = '2872177317829';
+const forumStatus = false;
+const telegramId = '12763781';
+const invitedBy = 'User123';
+
+// Только для просмотра: проверяем доступ к полю
+function hasFieldViewAccess(key) {
+    if (['money', 'fakeMoney', 'freeMoney'].includes(key)) {
+        return userInfo.value?.balance?.access === true;
+    }
+    if('email'.includes(key)) {
+        return userInfo.value?.email?.access === true;
+    }
+    return true;
+}
+// Отображаемое значение без проверки доступа на изменение
+function displayRawValue(key) {
+    const val = data[key];
+    return val != null ? val : '-';
+}
 
 function toggleAllEdit() {
-    allEditing.value = !allEditing.value
+    allEditing.value = !allEditing.value;
     if (!allEditing.value) {
-        Object.keys(editValues).forEach(k => editValues[k] = '')
+        Object.keys(editValues).forEach(k => editValues[k] = '');
     }
 }
 
 function setToValue(key) {
-    const val = parseFloat(editValues[key])
+    const val = parseFloat(editValues[key]);
     if (!isNaN(val)) {
-        data[key] = val
-        toast.add({ severity: 'success', summary: 'Установлено', detail: `Значение поля "${key}" установлено`, life: 3000 })
+        data[key] = val;
+        toast.add({ severity: 'success', summary: 'Установлено', detail: `Значение поля "${key}" установлено`, life: 3000 });
     } else {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 })
+        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 });
     }
 }
 
 function addToValue(key) {
-    const val = parseFloat(editValues[key])
+    const val = parseFloat(editValues[key]);
     if (!isNaN(val)) {
-        data[key] += val
-        toast.add({ severity: 'success', summary: 'Добавлено', detail: `К значению "${key}" добавлено ${val}`, life: 3000 })
+        data[key] += val;
+        toast.add({ severity: 'success', summary: 'Добавлено', detail: `К значению "${key}" добавлено ${val}`, life: 3000 });
     } else {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 })
+        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 });
     }
 }
 
 function subtractFromValue(key) {
-    const val = parseFloat(editValues[key])
+    const val = parseFloat(editValues[key]);
     if (!isNaN(val)) {
-        data[key] -= val
-        toast.add({ severity: 'success', summary: 'Вычтено', detail: `Из значения "${key}" вычтено ${val}`, life: 3000 })
+        data[key] -= val;
+        toast.add({ severity: 'success', summary: 'Вычтено', detail: `Из значения "${key}" вычтено ${val}`, life: 3000 });
     } else {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 })
+        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"`, life: 3000 });
     }
 }
 
 function fromCurrent(key) {
-    editValues[key] = data[key]
-    toast.add({ severity: 'info', summary: 'Скопировано', detail: `Текущее значение "${key}" вставлено в поле`, life: 3000 })
+    editValues[key] = data[key];
+    toast.add({ severity: 'info', summary: 'Скопировано', detail: `Текущее значение "${key}" вставлено в поле`, life: 3000 });
 }
-
-function clearField(key) {
-    editValues[key] = ''
-    toast.add({ severity: 'info', summary: 'Очищено', detail: `Поле "${key}" очищено`, life: 3000 })
-}
-
 
 function resetAll() {
-    Object.keys(editValues).forEach(k => editValues[k] = '')
+    Object.keys(editValues).forEach(k => editValues[k] = '');
 }
 
 function saveAll() {
     Object.keys(editValues).forEach(k => {
-        const val = parseFloat(editValues[k])
-        if (!isNaN(val)) data[k] = val
-    })
-    allEditing.value = false
+        const val = parseFloat(editValues[k]);
+        if (!isNaN(val)) data[k] = val;
+    });
+    allEditing.value = false;
 }
 </script>
 
