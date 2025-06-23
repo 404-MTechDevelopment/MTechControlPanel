@@ -24,6 +24,17 @@
                 </div>
                 <div class="separator"></div>
                 <div class="money-block">
+                    <!-- Статическое поле "Пополнено" -->
+                    <div class="info-block">
+                        <i class="pi pi-credit-card" />
+                        <div class="id_id-text value-section">
+                            <p class="id-text">Пополнено:</p>
+                            <div class="value-wrapper">
+                                <p class="id">{{ depositStatic }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Редактируемые поля баланса -->
                     <div class="info-block editable" v-for="item in editableFields" :key="item.key">
                         <i :class="item.icon" />
                         <div class="id_id-text value-section">
@@ -135,8 +146,10 @@ const toast = useToast();
 const nickname = computed(() => route.params.nickname || '');
 const userInfo = ref(null);
 
+// Статическое поле "Пополнено"
+const depositStatic = 100;
+
 const data = reactive({
-    depostit: 0,
     money: 0,
     fakeMoney: 0,
     freeMoney: 0,
@@ -144,7 +157,6 @@ const data = reactive({
 });
 
 const editValues = reactive({
-    depostit: '',
     money: '',
     fakeMoney: '',
     freeMoney: '',
@@ -153,7 +165,6 @@ const editValues = reactive({
 const allEditing = ref(false);
 
 const editableFields = [
-    { key: 'depostit', label: 'Пополнено', icon: 'pi pi-credit-card' },
     { key: 'money', label: 'Нахкоины', icon: 'pi pi-id-card' },
     { key: 'fakeMoney', label: 'Дебетовые Нахкоины', icon: 'pi pi-money-bill' },
     { key: 'freeMoney', label: 'Похкоины', icon: 'pi pi-pound' },
@@ -180,7 +191,6 @@ watchEffect(async () => {
             data.freeMoney = 0;
             data.freeCases = 0;
         }
-        data.depostit = info?.depostit ?? 0;
     } catch {
         toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' });
         userInfo.value = null;
@@ -189,11 +199,10 @@ watchEffect(async () => {
 });
 
 function resetDataToDefaults() {
-    data.depostit = 0;
     data.money = 0;
     data.fakeMoney = 0;
     data.freeMoney = 0;
-    data.cases = 0;
+    data.freeCases = 0;
 }
 
 function formatTimestamp(ms) {
@@ -214,7 +223,7 @@ const telegramId = '12763781';
 const invitedBy = 'User123';
 
 function hasFieldViewAccess(key) {
-    if (['money', 'fakeMoney', 'freeMoney', 'cases'].includes(key)) {
+    if (['money', 'fakeMoney', 'freeMoney', 'freeCases'].includes(key)) {
         return userInfo.value?.balance?.access === true;
     }
     if (key === 'email') {
@@ -314,7 +323,6 @@ function resetAll() {
 }
 
 function saveAll() {
-    // Сохраняем все через удалённые вызовы, если нужно:
     Object.keys(editValues).forEach(async (k) => {
         const val = parseFloat(editValues[k]);
         if (!isNaN(val)) {
