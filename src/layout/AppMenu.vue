@@ -20,6 +20,12 @@ const model = ref([
         items: [{ label: 'Группы', icon: 'pi pi-fw pi-user', to: '/groups' }]
     },
     {
+        label: 'FORUM',
+        items: [
+            { label: 'Форумные группы', icon: 'pi pi-fw pi-user', to: '/forum/groups' },
+        ]
+    },
+    {
         label: 'Сайт',
         items: [{ label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' }]
     },
