@@ -102,6 +102,7 @@ const editableFields = [
 const staticInfo = computed(() => [
     { label: 'Никнейм игрока:', value: nickname.value, icon: 'pi pi-user' },
     { label: 'UUID игрока:', value: userInfo.value?.uuid || '-', icon: 'pi pi-key' },
+    { label: 'ID форума игрока:', value: userInfo.value?.forumId || '-', icon: 'pi pi-key' },
     { label: 'Пополнено:', value: depositStatic, icon: 'pi pi-credit-card' }
 ]);
 
