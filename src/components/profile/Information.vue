@@ -3,449 +3,289 @@
         <div class="main-block-1">
             <div class="identify">
                 <div class="edit-all">
-                    <i class="pi pi-pencil" @click="toggleAllEdit" />
-                    <div v-if="allEditing" class="edit-actions">
-                        <i class="pi pi-sync" @click="resetAll" title="Сбросить изменения" />
-                    </div>
+                    <Button icon="pi pi-pencil" severity="secondary" @click="showDialog = true" rounded />
                 </div>
-                <div class="info-block">
-                    <i class="pi pi-user" />
+                <div class="info-block" v-for="item in staticInfo" :key="item.label">
+                    <i :class="item.icon" />
                     <div class="id_id-text">
-                        <p class="id-text">Никнейм игрока:</p>
-                        <p class="id">{{ nickname }}</p>
-                    </div>
-                </div>
-                <div class="info-block">
-                    <i class="pi pi-key" />
-                    <div class="id_id-text">
-                        <p class="id-text">UUID игрока:</p>
-                        <p class="id">{{ userInfo?.uuid }}</p>
+                        <p class="id-text">{{ item.label }}</p>
+                        <p class="id">{{ item.value }}</p>
                     </div>
                 </div>
                 <div class="separator"></div>
                 <div class="money-block">
-                    <!-- Статическое поле "Пополнено" -->
-                    <div class="info-block">
-                        <i class="pi pi-credit-card" />
-                        <div class="id_id-text value-section">
-                            <p class="id-text">Пополнено:</p>
-                            <div class="value-wrapper">
-                                <p class="id">{{ depositStatic }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Редактируемые поля баланса -->
-                    <div class="info-block editable" v-for="item in editableFields" :key="item.key">
+                    <div class="info-block" v-for="item in editableFields" :key="item.key">
                         <i :class="item.icon" />
-                        <div class="id_id-text value-section">
+                        <div class="id_id-text">
                             <p class="id-text">{{ item.label }}</p>
-                            <div class="value-wrapper">
-                                <template v-if="allEditing">
-                                    <input v-model="editValues[item.key]" type="number" class="edit-input" placeholder="..." />
-                                    <div class="buttons">
-                                        <i class="pi pi-download" title="Установить это значение" @click="setToValue(item.key)" />
-                                        <i class="pi pi-plus" title="Добавить к значению" @click="addToValue(item.key)" />
-                                        <i class="pi pi-minus" title="Вычесть из значения" @click="subtractFromValue(item.key)" />
-                                        <i class="pi pi-upload" title="Взять из значения в поле" @click="fromCurrent(item.key)" />
-                                    </div>
-                                </template>
-                                <template v-else>
-                                    <p class="id">
-                                        {{ hasFieldViewAccess(item.key) ? displayRawValue(item.key) : 'Нет доступа' }}
-                                    </p>
-                                </template>
-                            </div>
+                            <p class="id">
+                                {{ hasFieldViewAccess(item.key) ? displayRawValue(item.key) : 'Нет доступа' }}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="main-block-2">
-            <div class="down-main-blocks">
-                <div class="info-block">
-                    <i class="pi pi-user-plus" />
-                    <div class="id_id-text">
-                        <p class="id-text">Приглашён:</p>
-                        <p v-if="invitedBy != null">{{ invitedBy }}</p>
-                        <p v-else class="id">-</p>
-                    </div>
-                </div>
-                <div class="info-block">
-                    <i class="pi pi-calendar-plus" />
-                    <div class="id_id-text">
-                        <p class="id-text">Дата регистрации:</p>
-                        <p>{{ registerDate }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="info-block">
-                <i :class="twoFaConnectStatus ? 'pi pi-verified' : 'pi pi-times-circle'" />
+            <div class="info-block" v-for="item in extraInfo" :key="item.label">
+                <i :class="item.icon" />
                 <div class="id_id-text">
-                    <p class="id-text">Статус 2FA:</p>
-                    <p class="id">{{ twoFaConnectStatus ? 'Подключено' : 'Не подключено' }}</p>
-                </div>
-            </div>
-
-            <div class="info-block">
-                <i class="pi pi-megaphone" />
-                <div class="id_id-text">
-                    <p class="id-text">Статус форума:</p>
-                    <p class="id">{{ forumStatus ? 'Забанен' : 'Не забанен' }}</p>
-                </div>
-            </div>
-
-            <div class="info-block">
-                <i class="pi pi-telegram" />
-                <div class="id_id-text">
-                    <p class="id-text">Телеграмм:</p>
-                    <p class="id">{{ twoFaConnectStatus ? 'ID: ' + telegramId : 'Не подключен' }}</p>
-                </div>
-            </div>
-
-            <div class="info-block">
-                <i class="pi pi-discord" />
-                <div class="id_id-text">
-                    <p class="id-text">Дискорд:</p>
-                    <p class="id">{{ discordConnectStatus ? 'ID: ' + discordID : 'Не подключен' }}</p>
-                </div>
-            </div>
-
-            <div class="info-block">
-                <i class="pi pi-envelope" />
-                <div class="id_id-text">
-                    <p class="id-text">Email адрес:</p>
-                    <p class="id">
-                        {{ hasFieldViewAccess("email") ? userInfo.email.value : 'Нет доступа' }}
-                    </p>
+                    <p class="id-text">{{ item.label }}</p>
+                    <p class="id">{{ item.value }}</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <Dialog v-model:visible="showDialog" modal header="Редактирование баланса" class="edit-dialog" :style="{ width: '700px' }">
+        <div v-for="item in editableFields" :key="item.key" class="dialog-row">
+            <div class="dialog-label">
+                <i :class="item.icon" />
+                <span>{{ item.label }}</span>
+            </div>
+            <div class="dialog-controls">
+                <InputNumber v-model="editValues[item.key]" :min="0" class="w-20rem" />
+                <Button icon="pi pi-upload" @click="fromCurrent(item.key)" severity="secondary" rounded text />
+                <Button icon="pi pi-download" @click="setToValue(item.key)" severity="success" rounded />
+                <Button icon="pi pi-plus" @click="addToValue(item.key)" severity="info" rounded />
+                <Button icon="pi pi-minus" @click="subtractFromValue(item.key)" severity="warning" rounded />
+            </div>
+        </div>
+        <template #footer>
+            <Button label="Сбросить" icon="pi pi-refresh" @click="resetAll" text />
+        </template>
+    </Dialog>
     <InformationUserGroups />
     <UserHistory />
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, computed } from 'vue';
-import InformationUserGroups from '@/components/profile/InformationUserGroups.vue';
+import { ref, reactive, computed, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
+import InputNumber from 'primevue/inputnumber'
+import { getUserInfo } from '@/api/getUserInfo'
+import config from '@/config/config.json'
+import axios from 'axios'
 import UserHistory from '@/components/profile/UserHistory.vue';
-import { useToast } from 'primevue/usetoast';
-import { useRoute } from 'vue-router';
-import axios from 'axios';
-import { getUserInfo } from '@/api/getUserInfo';
-import config from '@/config/config.json';
+import InformationUserGroups from '@/components/profile/InformationUserGroups.vue';
 
-const route = useRoute();
-const toast = useToast();
-
-const nickname = computed(() => route.params.nickname || '');
-const userInfo = ref(null);
-
-// Статическое поле "Пополнено"
-const depositStatic = 100;
+const route = useRoute()
+const toast = useToast()
+const showDialog = ref(false)
+const nickname = computed(() => route.params.nickname || '')
+const userInfo = ref(null)
+const depositStatic = 100
 
 const data = reactive({
-    money: 0,
-    fakeMoney: 0,
-    freeMoney: 0,
-    freeCases: 0
-});
-
+    money: 0, fakeMoney: 0, freeMoney: 0, freeCases: 0
+})
 const editValues = reactive({
-    money: '',
-    fakeMoney: '',
-    freeMoney: '',
-    freeCases: ''
-});
-const allEditing = ref(false);
+    money: '', fakeMoney: '', freeMoney: '', freeCases: ''
+})
 
 const editableFields = [
     { key: 'money', label: 'Нахкоины', icon: 'pi pi-id-card' },
     { key: 'fakeMoney', label: 'Дебетовые Нахкоины', icon: 'pi pi-money-bill' },
     { key: 'freeMoney', label: 'Похкоины', icon: 'pi pi-pound' },
     { key: 'freeCases', label: 'Кейсы', icon: 'pi pi-briefcase' }
-];
+]
+
+const staticInfo = computed(() => [
+    { label: 'Никнейм игрока:', value: nickname.value, icon: 'pi pi-user' },
+    { label: 'UUID игрока:', value: userInfo.value?.uuid || '-', icon: 'pi pi-key' },
+    { label: 'Пополнено:', value: depositStatic, icon: 'pi pi-credit-card' }
+])
+
+const extraInfo = computed(() => [
+    { label: 'Приглашён:', value: invitedBy ?? '-', icon: 'pi pi-user-plus' },
+    { label: 'Дата регистрации:', value: registerDate.value, icon: 'pi pi-calendar-plus' },
+    { label: 'Статус 2FA:', value: twoFaConnectStatus ? 'Подключено' : 'Не подключено', icon: twoFaConnectStatus ? 'pi pi-verified' : 'pi pi-times-circle' },
+    { label: 'Статус форума:', value: forumStatus ? 'Забанен' : 'Не забанен', icon: 'pi pi-megaphone' },
+    { label: 'Телеграмм:', value: twoFaConnectStatus ? `ID: ${telegramId}` : 'Не подключен', icon: 'pi pi-telegram' },
+    { label: 'Дискорд:', value: discordConnectStatus ? `ID: ${discordID}` : 'Не подключен', icon: 'pi pi-discord' },
+    { label: 'Email адрес:', value: hasFieldViewAccess('email') ? userInfo.value?.email?.value : 'Нет доступа', icon: 'pi pi-envelope' }
+])
 
 watchEffect(async () => {
     if (!nickname.value) {
-        userInfo.value = null;
-        resetDataToDefaults();
-        return;
+        userInfo.value = null
+        resetDataToDefaults()
+        return
     }
     try {
-        const info = await getUserInfo(nickname.value);
-        userInfo.value = info;
-        if (info && info.balance && info.balance.access && info.balance.value) {
-            data.money = info.balance.value.money;
-            data.fakeMoney = info.balance.value.fakeMoney;
-            data.freeMoney = info.balance.value.freeMoney;
-            data.freeCases = info.balance.value.freeCases;
-        } else {
-            data.money = 0;
-            data.fakeMoney = 0;
-            data.freeMoney = 0;
-            data.freeCases = 0;
-        }
+        const info = await getUserInfo(nickname.value)
+        userInfo.value = info
+        if (info?.balance?.access && info.balance.value) Object.assign(data, info.balance.value)
+        else resetDataToDefaults()
     } catch {
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' });
-        userInfo.value = null;
-        resetDataToDefaults();
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' })
+        userInfo.value = null
+        resetDataToDefaults()
     }
-});
+})
 
 function resetDataToDefaults() {
-    data.money = 0;
-    data.fakeMoney = 0;
-    data.freeMoney = 0;
-    data.freeCases = 0;
+    data.money = 0
+    data.fakeMoney = 0
+    data.freeMoney = 0
+    data.freeCases = 0
 }
 
-function formatTimestamp(ms) {
-    if (!ms) return '-';
-    const d = new Date(ms);
-    const pad = (n) => n.toString().padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const fieldTranslations = {
+    money: 'Нахкоины',
+    fakeMoney: 'Дебетовые Нахкоины',
+    freeMoney: 'Похкоины',
+    freeCases: 'Кейсы'
 }
+
 const registerDate = computed(() => {
-    return userInfo.value ? formatTimestamp(userInfo.value.registrationTimestamp) : '-';
-});
+    if (!userInfo.value?.registrationTimestamp) return '-'
+    const d = new Date(userInfo.value.registrationTimestamp)
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`
+})
 
-const twoFaConnectStatus = true;
-const discordConnectStatus = false;
-const discordID = '2872177317829';
-const forumStatus = false;
-const telegramId = '12763781';
-const invitedBy = 'User123';
+const twoFaConnectStatus = true
+const discordConnectStatus = false
+const discordID = '2872177317829'
+const forumStatus = false
+const telegramId = '12763781'
+const invitedBy = 'User123'
 
 function hasFieldViewAccess(key) {
-    if (['money', 'fakeMoney', 'freeMoney', 'freeCases'].includes(key)) {
-        return userInfo.value?.balance?.access === true;
-    }
-    if (key === 'email') {
-        return userInfo.value?.email?.access === true;
-    }
-    return true;
-}
-function displayRawValue(key) {
-    const val = data[key];
-    return val != null ? val : '-';
+    if (['money', 'fakeMoney', 'freeMoney', 'freeCases'].includes(key)) return userInfo.value?.balance?.access === true
+    if (key === 'email') return userInfo.value?.email?.access === true
+    return true
 }
 
-// Общий вызов смены баланса на сервере
-async function changeBalanceRemote(balanceType, operationType, value) {
+function displayRawValue(key) {
+    return data[key] ?? '-'
+}
+
+async function changeBalanceRemote(type, op, value) {
     if (!userInfo.value?.uuid) {
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Нет информации о пользователе' });
-        return false;
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Нет информации о пользователе' })
+        return false
     }
     try {
-        const body = {
-            target: nickname.value,
-            type: balanceType,
-            operation: operationType,
-            value: value
-        };
-        const resp = await axios.post(`${config.baseURL}/admin/balance/change`, body);
-        if (resp.status === 200 && resp.data?.success) {
-            return true;
-        } else {
-            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось изменить баланс' });
-            return false;
-        }
-    } catch (err) {
-        if (err.response && err.response.status === 403) {
-            toast.add({ severity: 'error', summary: 'Нет прав', detail: 'Недостаточно прав для изменения баланса' });
-        } else {
-            console.error(err);
-            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Сетевая или серверная ошибка при изменении баланса' });
-        }
-        return false;
+        const body = { target: nickname.value, type, operation: op, value }
+        const r = await axios.post(`${config.baseURL}/admin/balance/change`, body)
+        return r.data?.success
+    } catch {
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось изменить баланс' })
+        return false
     }
 }
 
-function toggleAllEdit() {
-    allEditing.value = !allEditing.value;
-    if (!allEditing.value) {
-        Object.keys(editValues).forEach(k => editValues[k] = '');
+async function setToValue(k) {
+    const v = parseFloat(editValues[k])
+    if (isNaN(v)) return toast.add({ severity: 'warn', summary: 'Ошибка', detail: 'Введите число' })
+    if (await changeBalanceRemote(k, '=', v)) {
+        data[k] = v
+        toast.add({ severity: 'success', summary: 'Баланс обновлён', detail: `${fieldTranslations[k]} теперь ровно ${v}` })
     }
 }
 
-async function setToValue(key) {
-    const val = parseFloat(editValues[key]);
-    if (isNaN(val)) {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"` });
-        return;
-    }
-    const ok = await changeBalanceRemote(key, "=", val);
-    if (ok) {
-        data[key] = val;
-        toast.add({ severity: 'success', summary: 'Успех', detail: `Значение "${key}" установлено` });
+async function addToValue(k) {
+    const v = parseFloat(editValues[k])
+    if (isNaN(v)) return toast.add({ severity: 'warn', summary: 'Ошибка', detail: 'Введите число' })
+    if (await changeBalanceRemote(k, '+', v)) {
+        data[k] += v
+        toast.add({ severity: 'success', summary: 'Баланс изменён', detail: `${fieldTranslations[k]} увеличены на ${v}` })
     }
 }
 
-async function addToValue(key) {
-    const val = parseFloat(editValues[key]);
-    if (isNaN(val)) {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"` });
-        return;
-    }
-    const ok = await changeBalanceRemote(key, "+", val);
-    if (ok) {
-        data[key] += val;
-        toast.add({ severity: 'success', summary: 'Успех', detail: `К "${key}" добавлено ${val}` });
+async function subtractFromValue(k) {
+    const v = parseFloat(editValues[k])
+    if (isNaN(v)) return toast.add({ severity: 'warn', summary: 'Ошибка', detail: 'Введите число' })
+    if (await changeBalanceRemote(k, '-', v)) {
+        data[k] -= v
+        toast.add({ severity: 'success', summary: 'Баланс изменён', detail: `${fieldTranslations[k]} уменьшены на ${v}` })
     }
 }
 
-async function subtractFromValue(key) {
-    const val = parseFloat(editValues[key]);
-    if (isNaN(val)) {
-        toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Введите корректное число для "${key}"` });
-        return;
-    }
-    const ok = await changeBalanceRemote(key, "-", val);
-    if (ok) {
-        data[key] -= val;
-        toast.add({ severity: 'success', summary: 'Успех', detail: `Из "${key}" вычтено ${val}` });
-    }
-}
-
-function fromCurrent(key) {
-    editValues[key] = data[key];
-    toast.add({ severity: 'info', summary: 'Скопировано', detail: `Текущее значение "${key}" вставлено в поле` });
+function fromCurrent(k) {
+    editValues[k] = data[k]
+    toast.add({ severity: 'info', summary: 'Скопировано', detail: `Текущее значение вставлено` })
 }
 
 function resetAll() {
-    Object.keys(editValues).forEach(k => editValues[k] = '');
+    Object.keys(editValues).forEach(k => editValues[k] = '')
 }
 
 function saveAll() {
-    Object.keys(editValues).forEach(async (k) => {
-        const val = parseFloat(editValues[k]);
-        if (!isNaN(val)) {
-            const ok = await changeBalanceRemote(k, "=", val);
-            if (ok) data[k] = val;
+    Object.keys(editValues).forEach(async k => {
+        const v = parseFloat(editValues[k])
+        if (!isNaN(v)) {
+            if (await changeBalanceRemote(k, '=', v)) data[k] = v
         }
-    });
-    allEditing.value = false;
+    })
+    showDialog.value = false
 }
 </script>
 
 <style scoped lang="sass">
-.separator
-    height: 1px
-    background-color: #4c4c4c
-    margin: 15px 0
-
 .main-blocks
     display: flex
-    flex-direction: row
-    justify-content: space-between
-    width: 100%
+    flex-wrap: wrap
     gap: 15px
-    .main-block-1, .main-block-2
-        width: 50%
-
-.info-block
-    display: flex
-    flex-direction: row
-    margin-bottom: 10px
-    align-items: center
-    position: relative
-
-    i
-        margin-right: 10px
-        padding: 6px
-        background-color: #0e0e10
-        font-size: 2rem
-        border-radius: 10px
-
-    .id-text
-        margin: 0
-        font-size: 14px
-        font-weight: bold
-
-    .id
-        margin: 0
-        font-size: 18.1855px
-        color: #cccccc
+    margin-top: 15px
 
 .main-block-1, .main-block-2
+    flex: 1 1 48%
     border: 1px solid #4c4c4c
     border-radius: 15px
-    margin-top: 15px
-    padding: 10px
+    padding: 15px
     position: relative
 
-@media (max-width: 1120px)
-    .down-main-blocks
-        flex-direction: column
-        gap: 15px
-    .main-blocks
-        flex-direction: column
-        gap: 15px
-        .main-block-1, .main-block-2
-            width: 100%
-
-.editable
-    .value-section
-        align-items: center
-        gap: 8px
-
-    .value-wrapper
-        display: flex
-        align-items: center
-        gap: 8px
-        min-width: 180px
-        max-height: 27.28px
-
-        .buttons
-            display: flex
-            gap: 4px
-
-            i
-                font-size: 1.1rem
-                color: #aaa
-                cursor: pointer
-                transition: 0.2s
-                &:hover
-                    color: #fff
-
-.edit-input
-    background-color: #0e0e10
-    border: 1px solid #555
-    padding: 4px 6px
-    font-size: 13px
-    color: #fff
-    width: 80px
-
-.edit-actions
-    display: flex
-    justify-content: flex-end
-    gap: 10px
-    margin-top: 10px
-
-    i
-        font-size: 1.2rem
-        color: #bbb
-        cursor: pointer
-        transition: 0.2s
-        &:hover
-            color: #fff
+.separator
+    height: 1px
+    background-color: #444
+    margin: 10px 0
 
 .edit-all
     position: absolute
     top: 10px
     right: 10px
-    z-index: 1
-    i
-        font-size: 1.4rem
-        color: #bbb
-        cursor: pointer
-        transition: 0.2s
-        &:hover
-            color: #fff
+
+.info-block
+    display: flex
+    align-items: center
+    gap: 12px
+    margin-bottom: 10px
+
+.info-block i
+    font-size: 1.5rem
+    background: #111
+    padding: 6px
+    border-radius: 8px
+
+.id-text
+    font-weight: bold
+    margin: 0
+
+.id
+    margin: 0
+    color: #ccc
+
+.dialog-row
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 1rem
+
+.dialog-label
+    display: flex
+    align-items: center
+    gap: 10px
+    font-weight: 600
+    width: 35%
+
+.dialog-controls
+    display: flex
+    align-items: center
+    gap: 8px
+
 </style>
