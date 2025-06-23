@@ -11,7 +11,7 @@ onMounted(async () => {
     checkAuth.value = await checkAuthApi()
 })
 
-const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const { toggleMenu } = useLayout();
 </script>
 
 <template>
