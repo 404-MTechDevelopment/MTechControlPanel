@@ -6,34 +6,26 @@ import AppMenuItem from './AppMenuItem.vue';
 const model = ref([
     {
         label: 'Home',
-        items: [
-            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
-        ]
+        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
     },
     {
         label: 'Персонал',
         items: [
             { label: 'Список персонала', icon: 'pi pi-fw pi-home', to: '/crew' },
-            { label: 'Список персонала TEST', icon: 'pi pi-fw pi-home', to: '/crew-test' },
+            { label: 'Список персонала TEST', icon: 'pi pi-fw pi-home', to: '/crew-test' }
         ]
     },
     {
         label: 'PERMISSIONS',
-        items: [
-            { label: 'Группы', icon: 'pi pi-fw pi-user', to: '/groups' },
-        ]
+        items: [{ label: 'Группы', icon: 'pi pi-fw pi-user', to: '/groups' }]
     },
     {
         label: 'Сайт',
-        items: [
-            { label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' },
-        ]
+        items: [{ label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' }]
     },
     {
         label: 'Home-old',
-        items: [
-            { label: 'Dashboard-old', icon: 'pi pi-fw pi-home', to: '/uikit/dashboard' }
-        ]
+        items: [{ label: 'Dashboard-old', icon: 'pi pi-fw pi-home', to: '/uikit/dashboard' }]
     },
     {
         label: 'UI Components',

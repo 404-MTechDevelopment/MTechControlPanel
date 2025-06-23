@@ -53,9 +53,8 @@ import { reactive } from 'vue';
 const serverGroups = [
     { serverName: 'EnigmaRPG', roles: ['Админ', 'Куратор'] },
     { serverName: 'Omicron', roles: ['Модератор'] }
-]
+];
 const globalRoles = ['Куратор', 'Админ', 'Модератор', 'Партнёр', 'Проверенный'];
-
 
 const hoverStates = reactive<Record<string, boolean>>({});
 </script>
@@ -68,10 +67,12 @@ const hoverStates = reactive<Record<string, boolean>>({});
     padding: 10px
     display: flex
     flex-direction: column
+
 .global-groups
     display: flex
     flex-direction: column
     margin-top: 10px
+
 .info-block
     display: flex
     flex-direction: row

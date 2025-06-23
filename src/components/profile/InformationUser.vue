@@ -94,7 +94,7 @@
                 <i class="pi pi-envelope" style="font-size: 2rem; color: #708090; border-radius: 10px"></i>
                 <div class="id_id-text">
                     <p class="id-text">Email адрес:</p>
-                    <p v-if="emailAddress != null">{{emailAddress}}</p>
+                    <p v-if="emailAddress != null">{{ emailAddress }}</p>
                     <p v-else class="id">-</p>
                 </div>
             </div>
@@ -104,7 +104,7 @@
                     <i class="pi pi-share-alt" style="font-size: 2rem; color: #708090; border-radius: 10px"></i>
                     <div class="id_id-text">
                         <p class="id-text">Зарегистрирован на:</p>
-                        <p v-if="registerIn != null">{{registerIn}}</p>
+                        <p v-if="registerIn != null">{{ registerIn }}</p>
                         <p v-else class="id">-</p>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                     <i class="pi pi-user-plus" style="font-size: 2rem; color: #708090; border-radius: 10px"></i>
                     <div class="id_id-text">
                         <p class="id-text">Приглашён:</p>
-                        <p v-if="invitedBy != null">{{invitedBy}}</p>
+                        <p v-if="invitedBy != null">{{ invitedBy }}</p>
                         <p v-else class="id">-</p>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
                     <i class="pi pi-calendar-plus" style="font-size: 2rem; color: #708090; border-radius: 10px"></i>
                     <div class="id_id-text">
                         <p class="id-text">Дата регистрации:</p>
-                        <p>{{registerDate}}</p>
+                        <p>{{ registerDate }}</p>
                     </div>
                 </div>
             </div>
@@ -157,12 +157,14 @@ const pohcoin = '420';
     height: 1px
     background-color: #4c4c4c
     margin: 15px 0
+
 .main-blocks
     display: flex
     flex-direction: row
     justify-content: space-between
     width: 100%
     gap: 15px
+
     .main-block-1, .main-block-2
         width: 50%
 
@@ -185,11 +187,13 @@ const pohcoin = '420';
         margin: 0
         font-size: 13px
         color: #cccccc
+
 .main-block-1, .main-block-2
     border: 1px solid #4c4c4c
     border-radius: 15px
     margin-top: 15px
     padding: 10px
+
 .down-main-blocks
     display: flex
     flex-direction: row

@@ -34,22 +34,17 @@
 
         <!-- Диски -->
         <Panel header="Диски">
-            <div
-                v-for="(disk, idx) in data.system_info?.disks || []"
-                :key="idx"
-                class="mb-3 border p-3 rounded-md"
-            >
+            <div v-for="(disk, idx) in data.system_info?.disks || []" :key="idx" class="mb-3 border p-3 rounded-md">
                 <p><strong>Модель:</strong> {{ disk.model }}</p>
                 <p><strong>Размер:</strong> {{ disk.size }}</p>
                 <div class="ml-4">
                     <p class="font-semibold">Разделы:</p>
                     <ul class="list-disc list-inside">
-                        <li
-                            v-for="(part, pidx) in disk.partitions"
-                            :key="pidx"
-                        >
-                            <span><strong>Идентификация:</strong> {{ part.identification }}</span><br />
-                            <span><strong>Имя:</strong> {{ part.name }}</span><br />
+                        <li v-for="(part, pidx) in disk.partitions" :key="pidx">
+                            <span><strong>Идентификация:</strong> {{ part.identification }}</span
+                            ><br />
+                            <span><strong>Имя:</strong> {{ part.name }}</span
+                            ><br />
                             <span><strong>Размер:</strong> {{ part.size }}</span>
                         </li>
                     </ul>
@@ -60,10 +55,7 @@
         <!-- Источники питания -->
         <Panel header="Источники питания">
             <ul class="list-disc list-inside">
-                <li
-                    v-for="(ps, idx) in data.system_info?.powerSources || []"
-                    :key="idx"
-                >
+                <li v-for="(ps, idx) in data.system_info?.powerSources || []" :key="idx">
                     {{ ps.name }}
                 </li>
             </ul>
@@ -71,19 +63,17 @@
 
         <!-- Сетевые интерфейсы -->
         <Panel header="Сетевые интерфейсы">
-            <div
-                v-for="(net, idx) in data.system_info?.networkInterfaces || []"
-                :key="idx"
-                class="mb-3 border p-3 rounded-md"
-            >
+            <div v-for="(net, idx) in data.system_info?.networkInterfaces || []" :key="idx" class="mb-3 border p-3 rounded-md">
                 <p><strong>Имя:</strong> {{ net.name }}</p>
                 <p><strong>Отображаемое имя:</strong> {{ net.displayName }}</p>
                 <p><strong>MAC:</strong> {{ net.mac }}</p>
-                <p><strong>IPv4:</strong>
+                <p>
+                    <strong>IPv4:</strong>
                     <span v-if="(net.ipv4 || []).length === 0">—</span>
                     <span v-else>{{ net.ipv4.join(', ') }}</span>
                 </p>
-                <p><strong>IPv6:</strong>
+                <p>
+                    <strong>IPv6:</strong>
                     <span v-if="(net.ipv6 || []).length === 0">—</span>
                     <span v-else>{{ net.ipv6.join(', ') }}</span>
                 </p>
@@ -94,22 +84,13 @@
         <!-- Дисплеи -->
         <Panel header="Дисплеи">
             <ul class="list-disc list-inside">
-                <li
-                    v-for="(d, idx) in data.system_info?.displays || []"
-                    :key="idx"
-                >
-                    <strong>EDID Hash:</strong> {{ d.edidHash }}
-                </li>
+                <li v-for="(d, idx) in data.system_info?.displays || []" :key="idx"><strong>EDID Hash:</strong> {{ d.edidHash }}</li>
             </ul>
         </Panel>
 
         <!-- Звуковые карты -->
         <Panel header="Звуковые карты">
-            <div
-                v-for="(sc, idx) in data.system_info?.soundCards || []"
-                :key="idx"
-                class="mb-3 border p-3 rounded-md"
-            >
+            <div v-for="(sc, idx) in data.system_info?.soundCards || []" :key="idx" class="mb-3 border p-3 rounded-md">
                 <p><strong>Имя:</strong> {{ sc.name }}</p>
                 <p><strong>Модель:</strong> {{ sc.model }}</p>
                 <p><strong>Версия драйвера:</strong> {{ sc.driverVersion }}</p>
@@ -119,10 +100,7 @@
         <!-- USB-устройства -->
         <Panel header="USB-устройства">
             <ul class="list-disc list-inside">
-                <li
-                    v-for="(dev, idx) in data.system_info?.usbDevices || []"
-                    :key="idx"
-                >
+                <li v-for="(dev, idx) in data.system_info?.usbDevices || []" :key="idx">
                     <USBDeviceTree :device="dev" />
                 </li>
             </ul>
@@ -131,12 +109,7 @@
         <!-- Процессы -->
         <Panel header="Процессы (ID / Имя)">
             <ul class="list-disc list-inside max-h-64 overflow-auto">
-                <li
-                    v-for="(proc, idx) in data.system_info?.processes || []"
-                    :key="idx"
-                >
-                    {{ proc.processID }} / {{ proc.name }}
-                </li>
+                <li v-for="(proc, idx) in data.system_info?.processes || []" :key="idx">{{ proc.processID }} / {{ proc.name }}</li>
             </ul>
         </Panel>
 
@@ -144,7 +117,8 @@
         <Panel header="Сетевые параметры">
             <p><strong>Hostname:</strong> {{ data.system_info?.networkParams?.hostname }}</p>
             <p><strong>Domain:</strong> {{ data.system_info?.networkParams?.domain }}</p>
-            <p><strong>DNS Servers:</strong>
+            <p>
+                <strong>DNS Servers:</strong>
                 <span v-if="(data.system_info?.networkParams?.dnsServers || []).length === 0">—</span>
                 <span v-else>{{ data.system_info.networkParams.dnsServers.join(', ') }}</span>
             </p>
@@ -152,11 +126,7 @@
 
         <!-- Файловые хранилища -->
         <Panel header="Файловые хранилища">
-            <div
-                v-for="(fs, idx) in data.system_info?.fileStores || []"
-                :key="idx"
-                class="mb-3 border p-3 rounded-md"
-            >
+            <div v-for="(fs, idx) in data.system_info?.fileStores || []" :key="idx" class="mb-3 border p-3 rounded-md">
                 <p><strong>Имя:</strong> {{ fs.name }}</p>
                 <p><strong>Точка монтирования:</strong> {{ fs.mount }}</p>
                 <p><strong>Тип:</strong> {{ fs.type }}</p>
@@ -168,10 +138,10 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
-import api from '@/api/api'
-import Panel from 'primevue/panel'
-import Card from 'primevue/card'
+import { onMounted, ref } from 'vue';
+import api from '@/api/api';
+import Panel from 'primevue/panel';
+import Card from 'primevue/card';
 
 // Рекурсивный компонент для отображения вложенных USB-устройств
 const USBDeviceTree = {
@@ -194,9 +164,9 @@ const USBDeviceTree = {
     },
     mounted() {
         // Устанавливаем ссылку на себя, чтобы рекурсия работала
-        this.$options.components.USBDeviceTree = USBDeviceTree
+        this.$options.components.USBDeviceTree = USBDeviceTree;
     }
-}
+};
 
 export default {
     name: 'SupportStats',
@@ -206,50 +176,60 @@ export default {
         USBDeviceTree
     },
     setup() {
-        const data = ref({})
+        const data = ref({});
 
         onMounted(async () => {
-            const uuid = location.pathname.split('/').pop()
-            const res = await api.get(`/support/get-system-info`, { params: { uuid } })
-            data.value = res.data
-        })
+            const uuid = location.pathname.split('/').pop();
+            const res = await api.get(`/support/get-system-info`, { params: { uuid } });
+            data.value = res.data;
+        });
 
-        return { data }
+        return { data };
     }
-}
+};
 </script>
 
 <style scoped>
 .p-4 {
     padding: 1rem;
 }
+
 .space-y-4 > * + * {
     margin-top: 1rem;
 }
+
 .max-h-64 {
     max-height: 16rem;
 }
+
 .overflow-auto {
     overflow: auto;
 }
+
 .ml-4 {
     margin-left: 1rem;
 }
+
 .list-disc {
     list-style-type: disc;
 }
+
 .list-inside {
     list-style-position: inside;
 }
+
 .border {
     border: 1px solid #ddd;
 }
+
 .p-3 {
     padding: 0.75rem;
 }
+
 .rounded-md {
     border-radius: 0.375rem;
 }
+
 .mt-3 {
     margin-top: 0.75rem;
 }

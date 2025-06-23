@@ -17,22 +17,19 @@ const hoverStates = reactive<Record<string, boolean>>({});
                     />
 
                     <div class="flex flex-col flex-grow mt-4">
-                        <div class="text-xl font-semibold">
-                            <i class="pi pi-user ml-1 align-middle" style="font-size: 1rem"></i> <b> mixa1234qwerfghj</b>
-                        </div>
+                        <div class="text-xl font-semibold"><i class="pi pi-user ml-1 align-middle" style="font-size: 1rem"></i> <b> mixa1234qwerfghj</b></div>
                         <div>
                             <i class="pi pi-user-edit ml-1 align-middle" style="font-size: 1rem"></i><span class="text-xl font-semibold"> Роли: </span>
 
                             <Tag
                                 v-for="innerIndex in 2"
                                 :key="innerIndex"
-                                :icon=" hoverStates[`${outerIndex}-${innerIndex}`] ? 'pi pi-times' : 'pi pi-user' "
+                                :icon="hoverStates[`${outerIndex}-${innerIndex}`] ? 'pi pi-times' : 'pi pi-user'"
                                 value="Куратор"
                                 class="text-sm px-2 py-1 align-middle mr-1 mb-1 cursor-pointer"
                                 @mouseover="hoverStates[`${outerIndex}-${innerIndex}`] = true"
                                 @mouseleave="hoverStates[`${outerIndex}-${innerIndex}`] = false"
                             />
-
 
                             <i class="pi pi-plus ml-1 align-middle cursor-pointer" style="font-size: 1rem"></i>
                         </div>

@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import { ref, onBeforeMount } from 'vue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
-import { FilterMatchMode } from '@primevue/core/api'
+import { onBeforeMount, ref } from 'vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
 
-const id = ref('127637')
-const twoFaConnectStatus = ref(true)
-const visible = ref(false)
-const editedId = ref(id.value)
-const error = ref('')
+const id = ref('127637');
+const twoFaConnectStatus = ref(true);
+const visible = ref(false);
+const editedId = ref(id.value);
+const error = ref('');
 
-const history = ref([])
+const history = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     maker: { value: null, matchMode: FilterMatchMode.CONTAINS },
     recipient: { value: null, matchMode: FilterMatchMode.CONTAINS },
     type: { value: null, matchMode: FilterMatchMode.CONTAINS },
     value: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    date: { value: null, matchMode: FilterMatchMode.CONTAINS },
-})
+    date: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
 
 onBeforeMount(() => {
     history.value = [
@@ -35,7 +35,7 @@ onBeforeMount(() => {
             recipient: 'User123',
             type: 'Telegram',
             value: '127637',
-            action: 'Привязан Телеграм ID "127637"',
+            action: 'Привязан Телеграм ID "127637"'
         },
         {
             date: '2025-06-21 08:15',
@@ -43,7 +43,7 @@ onBeforeMount(() => {
             recipient: 'User123',
             type: 'Telegram',
             value: '127637',
-            action: 'Отвязали Телеграм ID "127637"',
+            action: 'Отвязали Телеграм ID "127637"'
         },
         {
             date: '2025-06-22 13:22',
@@ -51,19 +51,19 @@ onBeforeMount(() => {
             recipient: 'User123',
             type: 'Telegram',
             value: '555888',
-            action: 'Изменён Телеграм ID с "127637" на "555888"',
-        },
-    ]
-    editedId.value = id.value
-})
+            action: 'Изменён Телеграм ID с "127637" на "555888"'
+        }
+    ];
+    editedId.value = id.value;
+});
 
 function clearFilter() {
-    filters.value.global.value = null
-    filters.value.maker.value = null
-    filters.value.recipient.value = null
-    filters.value.type.value = null
-    filters.value.value.value = null
-    filters.value.date.value = null
+    filters.value.global.value = null;
+    filters.value.maker.value = null;
+    filters.value.recipient.value = null;
+    filters.value.type.value = null;
+    filters.value.value.value = null;
+    filters.value.date.value = null;
 }
 
 function untie() {
@@ -72,72 +72,66 @@ function untie() {
             severity: 'error',
             summary: 'Ошибка',
             detail: 'Ошибка при отвязке Телеграм ID',
-            life: 3000,
-        })
-        return
+            life: 3000
+        });
+        return;
     }
     addHistory({
         maker: 'CurrentAdmin',
         recipient: 'User123',
         type: 'Telegram',
         value: id.value,
-        action: `Отвязали Телеграм ID "${id.value}"`,
-    })
+        action: `Отвязали Телеграм ID "${id.value}"`
+    });
     toast.add({
         severity: 'success',
         summary: 'Успешно',
         detail: `Телеграм ID успешно отвязан`,
-        life: 3000,
-    })
-    id.value = ''
-    twoFaConnectStatus.value = false
+        life: 3000
+    });
+    id.value = '';
+    twoFaConnectStatus.value = false;
 }
 
 function openEdit() {
-    editedId.value = id.value
-    error.value = ''
-    visible.value = true
+    editedId.value = id.value;
+    error.value = '';
+    visible.value = true;
 }
 
 function saveEdit() {
     if (!/^\d+$/.test(editedId.value)) {
-        error.value = 'ID должен содержать только цифры'
+        error.value = 'ID должен содержать только цифры';
         toast.add({
             severity: 'error',
             summary: 'Ошибка',
             detail: error.value,
-            life: 3000,
-        })
-        return
+            life: 3000
+        });
+        return;
     }
     addHistory({
         maker: 'CurrentAdmin',
         recipient: 'User123',
         type: 'Telegram',
         value: editedId.value,
-        action: `Изменён Телеграм ID с "${id.value}" на "${editedId.value}"`,
-    })
+        action: `Изменён Телеграм ID с "${id.value}" на "${editedId.value}"`
+    });
     toast.add({
         severity: 'success',
         summary: 'Успешно',
         detail: `Телеграм ID успешно изменён на "${editedId.value}"`,
-        life: 3000,
-    })
-    id.value = editedId.value
-    visible.value = false
+        life: 3000
+    });
+    id.value = editedId.value;
+    visible.value = false;
 }
 
-function addHistory(entry: {
-    maker: string
-    recipient: string
-    type: string
-    value: string
-    action: string
-}) {
-    const now = new Date()
-    const dateStr = now.toISOString().slice(0, 19).replace('T', ' ')
-    history.value.unshift({ date: dateStr, ...entry })
-    if (history.value.length > 50) history.value.pop()
+function addHistory(entry: { maker: string; recipient: string; type: string; value: string; action: string }) {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 19).replace('T', ' ');
+    history.value.unshift({ date: dateStr, ...entry });
+    if (history.value.length > 50) history.value.pop();
 }
 </script>
 
@@ -167,24 +161,10 @@ function addHistory(entry: {
             </div>
         </div>
 
-        <Dialog
-            v-model:visible="visible"
-            modal
-            header="Редактировать Телеграм ID"
-            :style="{ width: '400px' }"
-            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-        >
+        <Dialog v-model:visible="visible" modal header="Редактировать Телеграм ID" :style="{ width: '400px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="dialog-body">
                 <label for="telegramIdInput" class="label">Телеграм ID</label>
-                <input
-                    id="telegramIdInput"
-                    v-model="editedId"
-                    type="text"
-                    class="input"
-                    autocomplete="off"
-                    maxlength="20"
-                    placeholder="Введите новый Телеграм ID"
-                />
+                <input id="telegramIdInput" v-model="editedId" type="text" class="input" autocomplete="off" maxlength="20" placeholder="Введите новый Телеграм ID" />
                 <p v-if="error" class="error-text">{{ error }}</p>
                 <div class="dialog-buttons">
                     <button class="btn primary" @click="saveEdit">Сохранить</button>
@@ -196,15 +176,7 @@ function addHistory(entry: {
 
     <div class="card mt-6">
         <h3 class="text-xl font-semibold mb-4">История изменений</h3>
-        <DataTable
-            :value="history"
-            :paginator="true"
-            :rows="5"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['maker','recipient','type','value','date']"
-            responsiveLayout="scroll"
-        >
+        <DataTable :value="history" :paginator="true" :rows="5" :filters="filters" filterDisplay="menu" :globalFilterFields="['maker', 'recipient', 'type', 'value', 'date']" responsiveLayout="scroll">
             <template #header>
                 <div class="flex justify-between items-center gap-4">
                     <Button type="button" icon="pi pi-filter-slash" label="Очистить" outlined @click="clearFilter" />
@@ -304,6 +276,7 @@ function addHistory(entry: {
 .btn-edit
     border-color: #708090
     color: #708090
+
     &:hover:not(:disabled)
         background-color: #708090
         color: #1c1b3a
@@ -311,9 +284,11 @@ function addHistory(entry: {
 .btn-untie
     border-color: #da1717
     color: #da1717
+
     &:hover:not(:disabled)
         background-color: #da2828
         color: #1c1b3a
+
     &:disabled
         opacity: 0.5
         cursor: default
@@ -337,6 +312,7 @@ function addHistory(entry: {
     color: #eee
     outline: none
     transition: border-color 0.2s ease-in-out
+
     &:focus
         border-color: #708090
 
@@ -353,14 +329,18 @@ function addHistory(entry: {
     cursor: pointer
     user-select: none
     transition: background-color 0.2s ease-in-out
+
     &.primary
         background-color: #3f51b5
         color: white
+
         &:hover
             background-color: #303f9f
+
     &.secondary
         background-color: #9e9e9e
         color: white
+
         &:hover
             background-color: #757575
 
@@ -371,26 +351,32 @@ function addHistory(entry: {
 
 .id-block
     display: flex
+
     .buttons
         display: flex
         flex-direction: column
         justify-items: center
         justify-content: center
+
 .info-block-1
     margin-bottom: 10px
+
 @media (max-width: 600px)
     .id-block
         flex-direction: column
         align-items: center
+
         .text
             .info-block
                 .id_id-text
                     display: flex
                     gap: 10px
+
         .buttons
             margin-top: 10px
             margin-left: 0
             width: 90%
+
             .btn-edit, .btn-untie
                 height: 40px
 </style>

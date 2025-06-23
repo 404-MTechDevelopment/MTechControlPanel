@@ -56,8 +56,7 @@ function flattenKeys(nodes) {
 
 // Проверяет, выбрано ли право по маске (parent.*) для конкретного ключа
 function hasParentNode(permissions, nodeKey) {
-    return permissions.some(p => p.node === nodeKey ||
-        (p.node.endsWith('.*') && nodeKey.startsWith(p.node.replace('.*', ''))));
+    return permissions.some((p) => p.node === nodeKey || (p.node.endsWith('.*') && nodeKey.startsWith(p.node.replace('.*', ''))));
 }
 
 // Устанавливает частичные флаги (для дерева)
@@ -67,7 +66,7 @@ function setPartialChecksFromTree(nodes) {
         if (children.length > 0) {
             setPartialChecksFromTree(children);
             const childKeys = flattenKeys(children);
-            const checked = childKeys.filter(k => permissionSelection.value[k]?.checked);
+            const checked = childKeys.filter((k) => permissionSelection.value[k]?.checked);
             if (checked.length > 0 && checked.length < childKeys.length) {
                 // Некоторые дети выбраны
                 permissionSelection.value[node.key].partialChecked = true;
@@ -93,16 +92,16 @@ function openEditDialog(group) {
     // Инициализируем дерево selection пустыми значениями
     permissionSelection.value = {};
     const allNodes = flattenKeys(permissionsTree.value);
-    const permNodes = editingGroup.permissions.map(p => p.node);
+    const permNodes = editingGroup.permissions.map((p) => p.node);
 
     if (permNodes.includes('*')) {
         // Если есть глобальный доступ
-        allNodes.forEach(nodeKey => {
+        allNodes.forEach((nodeKey) => {
             permissionSelection.value[nodeKey] = { checked: true, partialChecked: false };
         });
     } else {
         // Инициализируем checked по существующим правам
-        allNodes.forEach(nodeKey => {
+        allNodes.forEach((nodeKey) => {
             const isSelected = hasParentNode(editingGroup.permissions, nodeKey);
             permissionSelection.value[nodeKey] = { checked: isSelected, partialChecked: false };
         });
@@ -125,7 +124,7 @@ function openCreateDialog() {
     permissionSelection.value = {};
     // Инициализируем пустую selection: все права по умолчанию не выбраны
     const allNodes = flattenKeys(permissionsTree.value);
-    allNodes.forEach(nodeKey => {
+    allNodes.forEach((nodeKey) => {
         permissionSelection.value[nodeKey] = { checked: false, partialChecked: false };
     });
     isDialogVisible.value = true;
@@ -148,7 +147,7 @@ async function saveGroup() {
         optimizedPermissions.push({ node: '*', context: '.*' });
     } else {
         const parentNodes = new Set();
-        allSelectedKeys.forEach(key => {
+        allSelectedKeys.forEach((key) => {
             let isCovered = false;
             for (const parent of parentNodes) {
                 if (key.startsWith(parent.replace('.*', ''))) {
@@ -157,7 +156,7 @@ async function saveGroup() {
                 }
             }
             if (!isCovered) {
-                const isParent = allSelectedKeys.some(k => k !== key && k.startsWith(key.replace('.*', '')));
+                const isParent = allSelectedKeys.some((k) => k !== key && k.startsWith(key.replace('.*', '')));
                 if (isParent) {
                     parentNodes.add(key.endsWith('.*') ? key : key + '.*');
                 } else {
@@ -165,7 +164,7 @@ async function saveGroup() {
                 }
             }
         });
-        parentNodes.forEach(node => {
+        parentNodes.forEach((node) => {
             optimizedPermissions.push({ node, context: '.*' });
         });
     }
@@ -272,14 +271,16 @@ async function saveOrder() {
     groups.value.forEach((g, i) => (g.priority = total - i));
     try {
         // Сохраняем каждую группу
-        await Promise.all(groups.value.map(g =>
-            GroupService.saveGroup({
-                _id: g._id,
-                title: g.title,
-                priority: g.priority,
-                permissions: g.permissions || []
-            })
-        ));
+        await Promise.all(
+            groups.value.map((g) =>
+                GroupService.saveGroup({
+                    _id: g._id,
+                    title: g.title,
+                    priority: g.priority,
+                    permissions: g.permissions || []
+                })
+            )
+        );
         notify('success', 'Сохранено', 'Порядок групп обновлён');
         // Перезагрузить, чтобы убедиться, что всё согласовано с сервером
         await loadGroups();
@@ -313,33 +314,14 @@ onMounted(async () => {
         <Toast />
         <ConfirmDialog />
 
-        <div class="mb-3" style="display: flex; justify-content: flex-end;">
-            <Button
-                label="Создать группу"
-                icon="pi pi-plus"
-                severity="primary"
-                @click="openCreateDialog"
-            />
+        <div class="mb-3" style="display: flex; justify-content: flex-end">
+            <Button label="Создать группу" icon="pi pi-plus" severity="primary" @click="openCreateDialog" />
         </div>
 
-        <DataTable
-            :value="groups"
-            dataKey="_id"
-            :sortField="sortField"
-            :sortOrder="sortOrder"
-            sortMode="single"
-            @row-reorder="onRowReorder"
-            responsiveLayout="scroll"
-            class="p-datatable-sm"
-        >
+        <DataTable :value="groups" dataKey="_id" :sortField="sortField" :sortOrder="sortOrder" sortMode="single" @row-reorder="onRowReorder" responsiveLayout="scroll" class="p-datatable-sm">
             <Column rowReorder headerStyle="width:4rem" bodyStyle="text-align:center">
                 <template #body="{ data }">
-                    <div
-                        draggable="true"
-                        @dragstart="handleDragStart($event, data)"
-                        @dragover="handleDragOver"
-                        class="drag-handle"
-                    >
+                    <div draggable="true" @dragstart="handleDragStart($event, data)" @dragover="handleDragOver" class="drag-handle">
                         <i class="pi pi-bars" title="Перетащите" />
                     </div>
                 </template>
@@ -351,49 +333,25 @@ onMounted(async () => {
 
             <Column header="Действия" bodyStyle="text-align:center; width:10rem">
                 <template #body="{ data }">
-                    <Button
-                        icon="pi pi-pencil"
-                        class="p-button-rounded p-button-text p-button-sm mr-2"
-                        @click="openEditDialog(data)"
-                    />
-                    <Button
-                        icon="pi pi-trash"
-                        class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                        @click="confirmDelete($event, data)"
-                    />
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm mr-2" @click="openEditDialog(data)" />
+                    <Button icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger p-button-sm" @click="confirmDelete($event, data)" />
                 </template>
             </Column>
         </DataTable>
 
-        <Dialog
-            v-model:visible="isDialogVisible"
-            :header="isCreateMode ? 'Создать группу' : 'Редактировать группу'"
-            modal
-            :style="{ width: '450px' }"
-            :breakpoints="{ '960px': '75vw', '640px': '100vw' }"
-            class="p-fluid"
-        >
+        <Dialog v-model:visible="isDialogVisible" :header="isCreateMode ? 'Создать группу' : 'Редактировать группу'" modal :style="{ width: '450px' }" :breakpoints="{ '960px': '75vw', '640px': '100vw' }" class="p-fluid">
             <div class="formgrid grid">
                 <div class="field col-12">
                     <div>
                         <label>ID</label>
                     </div>
-                    <InputText
-                        v-model="editingGroup._id"
-                        :disabled="!isCreateMode"
-                        placeholder="Название (напр. admins)"
-                        class=""
-                    />
+                    <InputText v-model="editingGroup._id" :disabled="!isCreateMode" placeholder="Название (напр. admins)" class="" />
                 </div>
                 <div class="field col-12 mt-5">
                     <div>
                         <label>Title</label>
                     </div>
-                    <InputText
-                        v-model="editingGroup.title"
-                        placeholder="Введите название"
-                        class=""
-                    />
+                    <InputText v-model="editingGroup.title" placeholder="Введите название" class="" />
                 </div>
                 <div class="field col-12 mt-5 mb-5">
                     <label>Права</label>
@@ -410,19 +368,8 @@ onMounted(async () => {
                 </div>
             </div>
             <template #footer>
-                <Button
-                    label="Отменить"
-                    icon="pi pi-times"
-                    severity="secondary"
-                    outlined
-                    @click="isDialogVisible = false"
-                />
-                <Button
-                    :label="isCreateMode ? 'Создать' : 'Сохранить'"
-                    icon="pi pi-check"
-                    severity="primary"
-                    @click="saveGroup"
-                />
+                <Button label="Отменить" icon="pi pi-times" severity="secondary" outlined @click="isDialogVisible = false" />
+                <Button :label="isCreateMode ? 'Создать' : 'Сохранить'" icon="pi pi-check" severity="primary" @click="saveGroup" />
             </template>
         </Dialog>
     </div>
@@ -435,9 +382,11 @@ onMounted(async () => {
     padding: 0.5rem;
     display: inline-block;
 }
+
 .drag-handle:hover {
     color: #495057;
 }
+
 .drag-handle:active {
     cursor: grabbing;
 }

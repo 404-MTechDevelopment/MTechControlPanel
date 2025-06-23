@@ -97,7 +97,10 @@ function initFilters1() {
     filters1.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        'country.name': {
+            operator: FilterOperator.AND,
+            constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }]
+        },
         representative: { value: null, matchMode: FilterMatchMode.IN },
         date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
         balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
@@ -168,8 +171,8 @@ function calculateCustomerTotal(name) {
                     </IconField>
                 </div>
             </template>
-            <template #empty> No customers found. </template>
-            <template #loading> Loading customers data. Please wait. </template>
+            <template #empty> No customers found.</template>
+            <template #loading> Loading customers data. Please wait.</template>
             <Column field="name" header="Name" style="min-width: 12rem">
                 <template #body="{ data }">
                     {{ data.name }}
@@ -374,7 +377,10 @@ function calculateCustomerTotal(name) {
             </Column>
             <Column field="date" header="Date" style="min-width: 200px"></Column>
             <template #groupfooter="slotProps">
-                <div class="flex justify-end font-bold w-full">Total Customers: {{ calculateCustomerTotal(slotProps.data.representative.name) }}</div>
+                <div class="flex justify-end font-bold w-full">
+                    Total Customers:
+                    {{ calculateCustomerTotal(slotProps.data.representative.name) }}
+                </div>
             </template>
         </DataTable>
     </div>

@@ -1,11 +1,5 @@
-<script setup>
+<script setup></script>
 
-</script>
+<template></template>
 
-<template>
-
-</template>
-
-<style scoped lang="sass">
-
-</style>
+<style scoped lang="sass"></style>

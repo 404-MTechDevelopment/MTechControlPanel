@@ -5,11 +5,11 @@ import { checkAuthApi } from '@/api/getUserInfo';
 import { onMounted, ref } from 'vue';
 import { getHeadLink } from '@/api/getHeadLink';
 
-const checkAuth = ref(null)
+const checkAuth = ref(null);
 
 onMounted(async () => {
-    checkAuth.value = await checkAuthApi()
-})
+    checkAuth.value = await checkAuthApi();
+});
 
 const { toggleMenu } = useLayout();
 </script>
@@ -40,7 +40,6 @@ const { toggleMenu } = useLayout();
                     <AppConfigurator />
                 </div>
             </div>
-
 
             <button type="button" class="layout-topbar-action">
                 <img style="border-radius: 25%" v-if="checkAuth?.username" :src="getHeadLink(checkAuth.username)" alt="Head" class="layout-topbar-avatar" />

@@ -142,20 +142,20 @@ const router = createRouter({
                 },
                 {
                     path: '/profile/:nickname',
-                    redirect: to => {
+                    redirect: (to) => {
                         return {
                             name: 'profile',
                             params: {
                                 nickname: to.params.nickname,
                                 tab: 'info'
                             }
-                        }
+                        };
                     }
                 },
                 {
                     path: '/profile/:nickname/:tab',
                     name: 'profile',
-                    component: () => import('@/views/pages/profile/Profile.vue'),
+                    component: () => import('@/views/pages/profile/Profile.vue')
                 }
             ]
         },

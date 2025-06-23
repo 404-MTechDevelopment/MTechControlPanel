@@ -79,7 +79,11 @@ watchEffect(async () => {
         userExists.value = true;
     } catch (e) {
         if (e.response?.data?.error === 'user not found') {
-            toast.add({ severity: 'warn', summary: 'Пользователь не найден', detail: `Пользователь ${nickname.value} не найден` });
+            toast.add({
+                severity: 'warn',
+                summary: 'Пользователь не найден',
+                detail: `Пользователь ${nickname.value} не найден`
+            });
             userExists.value = false;
             userInfo.value = null;
         } else {

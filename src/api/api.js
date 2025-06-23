@@ -1,5 +1,5 @@
-import axios from 'axios'
-import config from '@/config/config.json'
+import axios from 'axios';
+import config from '@/config/config.json';
 
 const api = axios.create({
     baseURL: config.baseURL,
@@ -7,6 +7,6 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json'
     }
-})
+});
 
-export default api
+export default api;
