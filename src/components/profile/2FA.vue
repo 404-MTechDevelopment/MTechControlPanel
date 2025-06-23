@@ -8,11 +8,23 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
+import { useRoute } from 'vue-router';
+import { computed } from 'vue';
+import { getUserInfo } from '@/api/getUserInfo';
+import { changeUser2FA, unlinkUser2FA } from '@/api/twoFaApi';
 
 const toast = useToast();
 
-const id = ref('127637');
+const route = useRoute();
+const nickname = computed(() => route.params.nickname || '');
+console.log('Nickname:', nickname.value);
+
+const id = ref('');
 const twoFaConnectStatus = ref(true);
+const twoFaAccess = ref(false);
+
+const target = typeof nickname.value === 'string' ? nickname.value : nickname.value[0] || '';
+
 const visible = ref(false);
 const editedId = ref(id.value);
 const error = ref('');
@@ -27,7 +39,7 @@ const filters = ref({
     date: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
     history.value = [
         {
             date: '2025-06-20 12:34',
@@ -55,6 +67,34 @@ onBeforeMount(() => {
         }
     ];
     editedId.value = id.value;
+    try {
+        if (nickname.value) {
+            const userInfo = await getUserInfo(nickname.value);
+
+            if (userInfo.twoFa?.access) {
+                twoFaAccess.value = true;
+                if (userInfo.twoFa.value?.userId) {
+                    id.value = userInfo.twoFa.value.userId;
+                    twoFaConnectStatus.value = true;
+                } else {
+                    id.value = '';
+                    twoFaConnectStatus.value = false;
+                }
+            } else {
+                twoFaAccess.value = false;
+                id.value = '';
+                twoFaConnectStatus.value = false;
+            }
+            editedId.value = id.value;
+        }
+    } catch (e) {
+        toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось загрузить данные пользователя',
+            life: 3000
+        });
+    }
 });
 
 function clearFilter() {
@@ -66,7 +106,7 @@ function clearFilter() {
     filters.value.date.value = null;
 }
 
-function untie() {
+async function untie() {
     if (!id.value) {
         toast.add({
             severity: 'error',
@@ -76,22 +116,48 @@ function untie() {
         });
         return;
     }
-    addHistory({
-        maker: 'CurrentAdmin',
-        recipient: 'User123',
-        type: 'Telegram',
-        value: id.value,
-        action: `Отвязали Телеграм ID "${id.value}"`
-    });
-    toast.add({
-        severity: 'success',
-        summary: 'Успешно',
-        detail: `Телеграм ID успешно отвязан`,
-        life: 3000
-    });
-    id.value = '';
-    twoFaConnectStatus.value = false;
+
+    try {
+        const success = await unlinkUser2FA(target);
+
+        if (!success) {
+            toast.add(
+                {
+                    severity: 'error',
+                    summary: 'Ошибка',
+                    detail: 'Не удалось отвязать Телеграм ID',
+                    life: 3000
+                }
+            )
+        }
+
+        addHistory({
+            maker: 'CurrentAdmin',
+            recipient: target,
+            type: 'Telegram',
+            value: id.value,
+            action: `Отвязали Телеграм ID "${id.value}"`
+        });
+
+        toast.add({
+            severity: 'success',
+            summary: 'Успешно',
+            detail: `Телеграм ID успешно отвязан`,
+            life: 3000
+        });
+
+        id.value = '';
+        twoFaConnectStatus.value = false;
+    } catch (e) {
+        toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: e instanceof Error ? e.message : 'Неизвестная ошибка при отвязке',
+            life: 3000
+        });
+    }
 }
+
 
 function openEdit() {
     editedId.value = id.value;
@@ -99,7 +165,7 @@ function openEdit() {
     visible.value = true;
 }
 
-function saveEdit() {
+async function saveEdit() {
     if (!/^\d+$/.test(editedId.value)) {
         error.value = 'ID должен содержать только цифры';
         toast.add({
@@ -110,22 +176,48 @@ function saveEdit() {
         });
         return;
     }
-    addHistory({
-        maker: 'CurrentAdmin',
-        recipient: 'User123',
-        type: 'Telegram',
-        value: editedId.value,
-        action: `Изменён Телеграм ID с "${id.value}" на "${editedId.value}"`
-    });
-    toast.add({
-        severity: 'success',
-        summary: 'Успешно',
-        detail: `Телеграм ID успешно изменён на "${editedId.value}"`,
-        life: 3000
-    });
-    id.value = editedId.value;
-    visible.value = false;
+    try {
+        const type = 'telegram';
+
+        const success = await changeUser2FA(target, type, editedId.value);
+
+        if (!success) {
+            toast.add({
+                severity: 'error',
+                summary: 'Ошибка',
+                detail: 'Не удалось изменить Телеграм ID',
+                life: 3000
+            });
+        }
+
+        addHistory({
+            maker: 'CurrentAdmin',
+            recipient: target,
+            type,
+            value: editedId.value,
+            action: `Изменён Телеграм ID с "${id.value}" на "${editedId.value}"`
+        });
+
+        toast.add({
+            severity: 'success',
+            summary: 'Успешно',
+            detail: `Телеграм ID успешно изменён на "${editedId.value}"`,
+            life: 3000
+        });
+
+        id.value = editedId.value;
+        twoFaConnectStatus.value = true;
+        visible.value = false;
+    } catch (e) {
+        toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: e instanceof Error ? e.message : 'Неизвестная ошибка',
+            life: 3000
+        });
+    }
 }
+
 
 function addHistory(entry: { maker: string; recipient: string; type: string; value: string; action: string }) {
     const now = new Date();
@@ -143,21 +235,30 @@ function addHistory(entry: { maker: string; recipient: string; type: string; val
                     <i class="pi pi-user"></i>
                     <div class="id_id-text">
                         <p class="id-text">Телеграм ID:</p>
-                        <p class="id">{{ id || 'Не привязан' }}</p>
+                        <p class="id">
+                            {{ twoFaAccess ? (id || 'Не привязан') : 'Нет прав' }}
+                        </p>
                     </div>
                 </div>
                 <div class="info-block">
                     <i class="pi pi-verified"></i>
                     <div class="id_id-text">
                         <p class="id-text">Статус 2FA:</p>
-                        <p v-if="twoFaConnectStatus" class="id">Подключено</p>
-                        <p v-else class="id">Не подключено</p>
+                        <p class="id">
+                            <template v-if="twoFaAccess">
+                                {{ twoFaConnectStatus ? 'Подключено' : 'Не подключено' }}
+                            </template>
+                            <template v-else>
+                                Нет прав
+                            </template>
+                        </p>
+
                     </div>
                 </div>
             </div>
             <div class="buttons">
-                <button class="btn-edit" @click="openEdit">Редактировать</button>
-                <button class="btn-untie" @click="untie">Отвязать</button>
+                <button :disabled="!twoFaAccess" class="btn-edit" @click="openEdit">Редактировать</button>
+                <button :disabled="!twoFaAccess" class="btn-untie" @click="untie">Отвязать</button>
             </div>
         </div>
 
@@ -268,7 +369,6 @@ function addHistory(entry: { maker: string; recipient: string; type: string; val
     border-radius: 10px
     padding: 4px 10px
     font-weight: 600
-    cursor: pointer
     user-select: none
     border: 1px solid
     transition: all 0.2s ease-in-out
@@ -280,6 +380,9 @@ function addHistory(entry: { maker: string; recipient: string; type: string; val
     &:hover:not(:disabled)
         background-color: #708090
         color: #1c1b3a
+    &:disabled
+        opacity: 0.5
+        cursor: default
 
 .btn-untie
     border-color: #da1717
