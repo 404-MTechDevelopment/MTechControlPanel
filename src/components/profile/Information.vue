@@ -45,14 +45,14 @@
             </div>
             <div class="dialog-controls">
                 <InputNumber v-model="editValues[item.key]" :min="0" class="w-20rem" />
-                <Button icon="pi pi-upload" @click="fromCurrent(item.key)" severity="secondary" rounded text />
-                <Button icon="pi pi-download" @click="setToValue(item.key)" severity="success" rounded />
-                <Button icon="pi pi-plus" @click="addToValue(item.key)" severity="info" rounded />
-                <Button icon="pi pi-minus" @click="subtractFromValue(item.key)" severity="warning" rounded />
+                <Button icon="pi pi-upload" @click="fromCurrent(item.key)" severity="secondary" rounded text title="Вставить текущее значение" />
+                <Button icon="pi pi-download" @click="setToValue(item.key)" severity="success" rounded title="Установить указанное значение" />
+                <Button icon="pi pi-plus" @click="addToValue(item.key)" severity="info" rounded title="Прибавить указанное значение" />
+                <Button icon="pi pi-minus" @click="subtractFromValue(item.key)" severity="warning" rounded title="Вычесть указанное значение" />
             </div>
         </div>
         <template #footer>
-            <Button label="Сбросить" icon="pi pi-refresh" @click="resetAll" text />
+            <Button label="Сбросить" icon="pi pi-refresh" @click="resetAll" text title="Очистить все поля" />
         </template>
     </Dialog>
     <InformationUserGroups />

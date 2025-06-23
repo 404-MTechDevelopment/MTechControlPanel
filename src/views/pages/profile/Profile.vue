@@ -11,47 +11,14 @@
                 <div class="separator"></div>
 
                 <section class="navigation">
-                    <button
-                        :class="{ active: show === 'info' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'info' } })">
-                        Информация
-                    </button>
-                    <button
-                        :class="{ active: show === 'logs' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'logs' } })">
-                        Логи
-                    </button>
-                    <button
-                        :class="{ active: show === 'relations' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'relations' } })">
-                        Связи
-                    </button>
-                    <button
-                        :class="{ active: show === 'refs' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'refs' } })">
-                        Рефералы
-                    </button>
-                    <button
-                        :class="{ active: show === 'cart' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'cart' } })">
-                        Корзина
-                    </button>
-                    <button
-                        :class="{ active: show === 'vote' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'vote' } })">
-                        Голосование
-                    </button>
-                    <button
-                        :class="{ active: show === 'jira' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: 'jira' } })">
-                        Jira
-                    </button>
-                    <button
-                        :class="{ active: show === '2fa' }"
-                        @click="$router.push({ name: 'profile', params: { nickname, tab: '2fa' } })">
-                        2FA
-                    </button>
-
+                    <button :class="{ active: show === 'info' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'info' } })">Информация</button>
+                    <button :class="{ active: show === 'logs' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'logs' } })">Логи</button>
+                    <button :class="{ active: show === 'relations' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'relations' } })">Связи</button>
+                    <button :class="{ active: show === 'refs' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'refs' } })">Рефералы</button>
+                    <button :class="{ active: show === 'cart' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'cart' } })">Корзина</button>
+                    <button :class="{ active: show === 'vote' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'vote' } })">Голосование</button>
+                    <button :class="{ active: show === 'jira' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'jira' } })">Jira</button>
+                    <button :class="{ active: show === '2fa' }" @click="$router.push({ name: 'profile', params: { nickname, tab: '2fa' } })">2FA</button>
                 </section>
 
                 <Information v-if="show === 'info'" />
@@ -67,62 +34,63 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
-import Information from '@/components/profile/Information.vue'
-import Voting from '@/components/profile/Voting.vue'
-import Jira from '@/components/profile/Jira.vue'
-import TwoFactorAuth from '@/components/profile/2FA.vue'
-import Logs from '@/components/profile/Logs.vue'
-import Cart from '@/components/profile/Cart.vue'
-import Referrals from '@/components/profile/Referal.vue'
-import { getUserInfo } from '@/api/getUserInfo'
-import { useToast } from 'primevue/usetoast'
-import { getHeadLink } from '@/api/getHeadLink'
-import { watch } from 'vue';
+<script setup>
+import { computed, ref, watch, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
+import Information from '@/components/profile/Information.vue';
+import Voting from '@/components/profile/Voting.vue';
+import Jira from '@/components/profile/Jira.vue';
+import TwoFactorAuth from '@/components/profile/2FA.vue';
+import Logs from '@/components/profile/Logs.vue';
+import Cart from '@/components/profile/Cart.vue';
+import Referrals from '@/components/profile/Referal.vue';
+import { getUserInfo } from '@/api/getUserInfo';
+import { useToast } from 'primevue/usetoast';
+import { getHeadLink } from '@/api/getHeadLink';
 
-const route = useRoute()
-const toast = useToast()
+const route = useRoute();
+const toast = useToast();
 
-const nickname = computed(() => route.params.nickname || '')
-const headLink = computed(() => getHeadLink(nickname.value))
-const loading = ref(false)
-const userExists = ref(false)
-const userInfo = ref(null)
+const nickname = computed(() => route.params.nickname || '');
+const headLink = computed(() => getHeadLink(nickname.value));
+const loading = ref(false);
+const userExists = ref(false);
+const userInfo = ref(null);
 
-const show = ref(route.params.tab || 'info')
+const show = ref(route.params.tab || 'info');
 
-watch(() => route.params.tab, (newTab) => {
-    show.value = newTab || 'info'
-})
+watch(
+    () => route.params.tab,
+    (newTab) => {
+        show.value = newTab || 'info';
+    }
+);
 
 watchEffect(async () => {
     if (!nickname.value) {
-        userExists.value = false
-        userInfo.value = null
-        loading.value = false
-        return
+        userExists.value = false;
+        userInfo.value = null;
+        loading.value = false;
+        return;
     }
-    loading.value = true
+    loading.value = true;
     try {
-        const data = await getUserInfo(nickname.value)
-        userInfo.value = data
-        userExists.value = true
+        userInfo.value = await getUserInfo(nickname.value);
+        userExists.value = true;
     } catch (e) {
         if (e.response?.data?.error === 'user not found') {
-            toast.add({ severity: 'warn', summary: 'Пользователь не найден', detail: `Пользователь ${nickname.value} не найден` })
-            userExists.value = false
-            userInfo.value = null
+            toast.add({ severity: 'warn', summary: 'Пользователь не найден', detail: `Пользователь ${nickname.value} не найден` });
+            userExists.value = false;
+            userInfo.value = null;
         } else {
-            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' })
-            userExists.value = false
-            userInfo.value = null
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось получить данные пользователя' });
+            userExists.value = false;
+            userInfo.value = null;
         }
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-})
+});
 </script>
 
 <style scoped lang="sass">
