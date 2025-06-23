@@ -241,7 +241,8 @@ function addHistory(entry: { maker: string; recipient: string; type: string; val
                     </div>
                 </div>
                 <div class="info-block">
-                    <i class="pi pi-verified"></i>
+                    <i v-if="!twoFaAccess" class="pi pi-verified"></i>
+                    <i v-else class="pi pi-times"></i>
                     <div class="id_id-text">
                         <p class="id-text">Статус 2FA:</p>
                         <p class="id">
