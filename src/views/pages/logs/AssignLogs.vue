@@ -101,13 +101,6 @@ const serverOptions = [
     { label: 'Глобально', value: 'global' }
 ]
 
-function resetFilters() {
-    filters.value.global.value = null
-    filters.value.admin.constraints[0].value = null
-    filters.value.target.constraints[0].value = null
-    filters.value.server.value = null
-}
-
 function formatDateOneLine(value) {
     const date = new Date(value)
     return date.toLocaleString('ru-RU', {
@@ -149,7 +142,7 @@ const testLogs = [
         admin: 'Root',
         target: 'GoodAdmin',
         role: 'Администратор',
-        server: null,
+        server: 'global',
         reason: 'Переведен в глобальный состав'
     },
     {
@@ -180,87 +173,71 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss">
-.card {
-    padding: 16px;
-}
+<style scoped lang="sass">
+.card
+    padding: 16px
 
-.title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
+.title
+    font-size: 1.25rem
+    font-weight: 700
+    margin-bottom: 1rem
 
-.header-controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
+.header-controls
+    display: flex
+    flex-wrap: wrap
+    justify-content: space-between
+    align-items: center
+    gap: 12px
+    margin-bottom: 12px
 
-.server-dropdown {
-    width: 16rem;
-}
+.server-dropdown
+    width: 16rem
 
-.custom-datatable {
-    font-size: 13.5px;
-    line-height: 1.4;
-}
-:deep(.p-datatable) {
-    table-layout: fixed;
-    width: 100%;
-}
+.custom-datatable
+    font-size: 13.5px
+    line-height: 1.4
+    :deep(.p-datatable)
+        table-layout: fixed
+        width: 100%
 
 :deep(.p-datatable-thead > tr > th),
-:deep(.p-datatable-tbody > tr > td) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+:deep(.p-datatable-tbody > tr > td)
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
 
-:deep(.p-datatable .p-datatable-tbody > tr) {
-    line-height: 1.4rem;
-}
+:deep(.p-datatable .p-datatable-tbody > tr)
+    line-height: 1.4rem
 
-.action-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-}
+.action-cell
+    display: flex
+    align-items: center
+    gap: 6px
+    font-weight: 600
 
-.action-cell.assign {
-    color: #22c55e;
-}
+.action-cell.assign
+    color: #22c55e
 
-.action-cell.remove {
-    color: #ef4444;
-}
+.action-cell.remove
+    color: #ef4444
 
-.action-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
+.action-detail
+    display: flex
+    flex-direction: column
+    gap: 4px
 
-.label {
-    font-weight: 600;
-    margin-right: 4px;
-}
+.label
+    font-weight: 600
+    margin-right: 4px
 
-.role {
-    color: #6366f1;
-    font-weight: 600;
-}
+.role
+    color: #6366f1
+    font-weight: 600
 
-.reason-label {
-    color: #6b7280;
-}
+.reason-label
+    color: #6b7280
 
-.reason {
-    font-style: italic;
-    color: #374151;
-}
+.reason
+    font-style: italic
+    color: #374151
 </style>
