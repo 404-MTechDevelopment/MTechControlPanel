@@ -64,7 +64,8 @@ export const GroupService = {
                 _id: group._id,
                 title: group.title,
                 priority: group.priority || 0,
-                permissions: group.permissions || []
+                permissions: group.permissions || [],
+                forumGroupsLinked: group.forumGroupsLinked || [],
             };
             const res = await axios.post(`${config.baseURL}/groups/save`, { group: groupData });
             console.log('saveGroup response:', res);
