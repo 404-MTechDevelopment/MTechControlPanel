@@ -326,18 +326,36 @@ onMounted(async () => {
             </Column>
         </DataTable>
 
-        <Dialog v-model:visible="isDialogVisible" :header="isCreateMode ? 'Создать группу' : 'Редактировать группу'" modal :style="{ width: '450px' }" :breakpoints="{ '960px': '75vw', '640px': '100vw' }" class="p-fluid">
-            <div class="formgrid grid">
+        <Dialog
+            v-model:visible="isDialogVisible"
+            :header="isCreateMode ? 'Создать группу' : 'Редактировать группу'"
+            modal
+            :style="{ width: '500px' }"
+            :breakpoints="{ '960px': '75vw', '640px': '95vw' }"
+            class="p-fluid rounded-3xl shadow-2xl"
+        >
+            <div class="formgrid grid gap-4">
                 <div class="field col-12">
-                    <label>ID</label>
-                    <InputText v-model="editingGroup._id" :disabled="!isCreateMode" placeholder="Название (напр. admins)" />
+                    <label class="text-lg font-semibold text-gray-400 mb-2 block">ID</label>
+                    <InputText
+                        v-model="editingGroup._id"
+                        :disabled="!isCreateMode"
+                        placeholder="Название (напр. admins)"
+                        class="p-inputtext-lg w-full"
+                    />
                 </div>
-                <div class="field col-12 mt-5">
-                    <label>Title</label>
-                    <InputText v-model="editingGroup.title" placeholder="Введите название" />
+
+                <div class="field col-12">
+                    <label class="text-lg font-semibold text-gray-400 mb-2 block">Название</label>
+                    <InputText
+                        v-model="editingGroup.title"
+                        placeholder="Введите название"
+                        class="p-inputtext-lg w-full"
+                    />
                 </div>
-                <div class="field col-12 mt-5 mb-5">
-                    <label>Права</label>
+
+                <div class="field col-12">
+                    <label class="text-lg font-semibold text-gray-400 mb-2 block">Права</label>
                     <Tree
                         :value="permissionsTree"
                         dataKey="key"
@@ -346,26 +364,42 @@ onMounted(async () => {
                         :propagateSelectionDown="true"
                         :propagateSelectionUp="true"
                         @selection-change="onPermissionChange"
-                        class="permissions-tree"
+                        class="permissions-tree border border-gray-300 rounded-xl shadow-sm p-2"
                     />
                 </div>
 
-                <div class="field col-12 mt-3">
-                    <label>Форумные группы</label>
+                <div class="field col-12">
+                    <label class="text-lg font-semibold text-gray-400 mb-2 block">Форумные группы</label>
                     <MultiSelect
-                        class="mt-1"
                         v-model="editingGroup.forumGroupsLinked"
                         :options="forumGroupOptions"
                         optionLabel="title"
                         optionValue="_id"
                         placeholder="Выберите группы для привязки"
                         :filter="true"
+                        class="w-full p-multiselect-lg"
                     />
                 </div>
             </div>
+
             <template #footer>
-                <Button label="Отменить" icon="pi pi-times" severity="secondary" outlined @click="isDialogVisible = false" />
-                <Button :label="isCreateMode ? 'Создать' : 'Сохранить'" icon="pi pi-check" severity="primary" @click="saveGroup" />
+                <div class="flex justify-end gap-3 mt-4">
+                    <Button
+                        label="Отменить"
+                        icon="pi pi-times"
+                        severity="secondary"
+                        outlined
+                        class="p-button-lg"
+                        @click="isDialogVisible = false"
+                    />
+                    <Button
+                        :label="isCreateMode ? 'Создать' : 'Сохранить'"
+                        icon="pi pi-check"
+                        severity="primary"
+                        class="p-button-lg"
+                        @click="saveGroup"
+                    />
+                </div>
             </template>
         </Dialog>
     </div>
