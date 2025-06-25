@@ -41,7 +41,7 @@ import Information from '@/components/profile/Information.vue';
 import Voting from '@/components/profile/Voting.vue';
 import Jira from '@/components/profile/Jira.vue';
 import TwoFactorAuth from '@/components/profile/2FA.vue';
-import Logs from '@/components/profile/Logs.vue';
+import Logs from '@/components/profile';
 import Cart from '@/components/profile/Cart.vue';
 import Referrals from '@/components/profile/Referal.vue';
 import { getUserInfo } from '@/api/getUserInfo';
