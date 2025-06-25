@@ -13,6 +13,7 @@ import Tree from 'primevue/tree';
 import MultiSelect from 'primevue/multiselect';
 import { GroupService } from '@/service/GroupService';
 import { ForumGroupService } from '@/service/ForumGroupService';
+import CustomMultiSelect from '@/components/CustomMultiSelect.vue';
 
 const toast = useToast();
 const confirm = useConfirm();
@@ -368,16 +369,14 @@ onMounted(async () => {
                     />
                 </div>
 
-                <div class="field col-12">
+                <div class="field col-12 multiselect">
                     <label class="text-lg font-semibold text-gray-400 mb-2 block">Форумные группы</label>
-                    <MultiSelect
+                    <CustomMultiSelect
                         v-model="editingGroup.forumGroupsLinked"
                         :options="forumGroupOptions"
                         optionLabel="title"
                         optionValue="_id"
                         placeholder="Выберите группы для привязки"
-                        :filter="true"
-                        class="w-full p-multiselect-lg"
                     />
                 </div>
             </div>
@@ -405,54 +404,55 @@ onMounted(async () => {
     </div>
 </template>
 
-<style scoped>
-.drag-handle {
-    cursor: grab;
-    user-select: none;
-    padding: 0.5rem;
-    display: inline-block;
-}
-.drag-handle:hover {
-    color: #495057;
-}
-.drag-handle:active {
-    cursor: grabbing;
-}
-.permissions-tree {
-    max-height: 300px;
-    overflow: auto;
-    margin-top: 0.5rem;
-    background: var(--surface-card);
-    border: 1px solid var(--surface-border);
-    border-radius: 6px;
-    padding: 0.75rem;
-}
-.permissions-tree .p-tree .p-treenode-children {
-    margin-left: 1.5rem;
-}
-.permissions-tree .p-tree .p-treenode .p-treenode-content {
-    display: flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-}
-.permissions-tree .p-tree .p-treenode-toggler {
-    width: 1em;
-    text-align: center;
-    margin-right: 0.5rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-.permissions-tree .p-tree .p-checkbox {
-    margin-right: 0.5rem;
-}
-.permissions-tree .p-tree .p-treenode .p-treenode-content:hover {
-    background: var(--surface-hover);
-    border-radius: 4px;
-}
-:deep(.permissions-tree .p-tree .p-treenode .p-treenode-content.p-highlight) {
-    background: var(--surface-card) !important;
-}
-.mb-3 {
-    margin-bottom: 1rem;
-}
+<style scoped lang="sass">
+.drag-handle
+    cursor: grab
+    user-select: none
+    padding: 0.5rem
+    display: inline-block
+
+.drag-handle:hover
+    color: #495057
+
+.drag-handle:active
+    cursor: grabbing
+
+.permissions-tree
+    max-height: 300px
+    overflow: auto
+    margin-top: 0.5rem
+    background: var(--surface-card)
+    border: 1px solid var(--surface-border)
+    border-radius: 6px
+    padding: 0.75rem
+
+.permissions-tree .p-tree .p-treenode-children
+    margin-left: 1.5rem
+
+.permissions-tree .p-tree .p-treenode .p-treenode-content
+    display: flex
+    align-items: center
+    padding: 0.25rem 0.5rem
+
+.permissions-tree .p-tree .p-treenode-toggler
+    width: 1em
+    text-align: center
+    margin-right: 0.5rem
+    font-size: 0.9rem
+    cursor: pointer
+
+.permissions-tree .p-tree .p-checkbox
+    margin-right: 0.5rem
+
+.permissions-tree .p-tree .p-treenode .p-treenode-content:hover
+    background: var(--surface-hover)
+    border-radius: 4px
+
+:deep(.permissions-tree .p-tree .p-treenode .p-treenode-content.p-highlight)
+    background: var(--surface-card) !important
+
+.mb-3
+    margin-bottom: 1rem
+
 </style>
+
