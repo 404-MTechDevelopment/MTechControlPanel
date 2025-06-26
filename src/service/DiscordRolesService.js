@@ -25,6 +25,7 @@ export const DiscordRolesService = {
             console.log('setSyncable response:', res);
             if (!res.data?.success) {
                 console.error('getRoles: unexpected response structure', res.data);
+                throw new Error('getRoles: unexpected response structure', res.data);
             }
         } catch (err) {
             console.error('getRoles error:', err);
