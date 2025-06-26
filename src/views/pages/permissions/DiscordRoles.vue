@@ -53,7 +53,6 @@ onMounted(async () => {
             <Column field="_id" header="ID" />
             <Column field="name" header="Название" />
             <Column field="priority" header="Приоритет" sortable />
-            <Column field="syncable" header="Syncable" sortable />
 
             <Column header="Синхронизация" bodyStyle="text-align:center; width:10rem">
                 <template #body="{ data }">
