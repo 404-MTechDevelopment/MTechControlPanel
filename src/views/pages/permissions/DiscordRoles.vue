@@ -27,6 +27,16 @@ async function loadGroups() {
     }
 }
 
+const sync = (data) => {
+    try {
+        DiscordRolesService.setSyncable(data._id, data.syncable)
+        notify('success', 'Успех', 'Состояние роли обновлено');
+    }
+    catch (err) {
+        notify('error', 'Ошибка', 'Не удалось обновить роль');
+    }
+}
+
 onMounted(async () => {
     await Promise.all([loadGroups()]);
 });
@@ -43,10 +53,11 @@ onMounted(async () => {
             <Column field="_id" header="ID" />
             <Column field="name" header="Название" />
             <Column field="priority" header="Приоритет" sortable />
+            <Column field="syncable" header="Syncable" sortable />
 
             <Column header="Синхронизация" bodyStyle="text-align:center; width:10rem">
                 <template #body="{ data }">
-                    <ToggleSwitch v-model="switchValue" />
+                    <ToggleSwitch v-model="data.syncable"  @change="() => sync(data)"/>
                 </template>
             </Column>
         </DataTable>
