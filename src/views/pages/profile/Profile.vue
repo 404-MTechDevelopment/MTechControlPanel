@@ -18,13 +18,13 @@
                     <button :class="{ active: show === 'cart' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'cart' } })">Корзина</button>
                     <button :class="{ active: show === 'vote' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'vote' } })">Голосование</button>
                     <button :class="{ active: show === 'jira' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'jira' } })">Jira</button>
-                    <button :class="{ active: show === '2fa' }" @click="$router.push({ name: 'profile', params: { nickname, tab: '2fa' } })">2FA</button>
+                    <button :class="{ active: show === 'connections' }" @click="$router.push({ name: 'profile', params: { nickname, tab: 'connections' } })">Привязки</button>
                 </section>
 
                 <Information v-if="show === 'info'" />
                 <Voting v-if="show === 'vote'" />
                 <Jira v-if="show === 'jira'" />
-                <TwoFactorAuth v-if="show === '2fa'" />
+                <Connections v-if="show === 'connections'" />
                 <Logs v-if="show === 'logs'" />
                 <Cart v-if="show === 'cart'" />
                 <Referrals v-if="show === 'refs' || show === 'relations'" />
@@ -40,7 +40,7 @@ import { useRoute } from 'vue-router';
 import Information from '@/components/profile/Information.vue';
 import Voting from '@/components/profile/Voting.vue';
 import Jira from '@/components/profile/Jira.vue';
-import TwoFactorAuth from '@/components/profile/2FA.vue';
+import Connections from '@/components/profile/UserConnections.vue';
 import Logs from '@/components/profile/Logs.vue';
 import Cart from '@/components/profile/Cart.vue';
 import Referrals from '@/components/profile/Referal.vue';
