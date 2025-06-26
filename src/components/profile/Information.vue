@@ -3,7 +3,7 @@
         <div class="main-block-1">
             <div class="identify">
                 <div class="edit-all">
-                    <Button icon="pi pi-pencil" severity="secondary" @click="showDialog = true" rounded />
+                    <Button icon="pi pi-pencil" severity="secondary" label="Edit" @click="showDialog = true" rounded />
                 </div>
                 <div class="info-block" v-for="item in staticInfo" :key="item.label">
                     <i :class="item.icon" />
@@ -26,7 +26,16 @@
                 </div>
             </div>
         </div>
-        <div class="main-block-2">
+
+        <div class="main-block-2" style="display: flex; flex-direction: column; position: relative;">
+            <div class="sync-block" style="align-self: flex-end; position: absolute;">
+                <Button
+                    icon="pi pi-sync"
+                    severity="secondary"
+                    label="Sync"
+                    rounded
+                />
+            </div>
             <div class="info-block" v-for="item in extraInfo" :key="item.label">
                 <i :class="item.icon" />
                 <div class="id_id-text">
@@ -135,6 +144,17 @@ const extraInfo = computed(() => {
     } else {
         res.push({ label: 'Дискорд:', value: 'Нет доступа', icon: 'pi pi-discord' })
     }
+
+    if (userInfo.value?.invitedBy?.access) {
+        res.push({
+            label: 'Кем приглашён:',
+            value: userInfo.value.invitedBy?.value || 'Неизвестно',
+            icon: 'pi pi-users'
+        })
+    } else {
+        res.push({ label: 'Кем приглашён:', value: 'Нет доступа', icon: 'pi pi-users' })
+    }
+
 
     if (userInfo.value?.email?.access) {
         res.push({
