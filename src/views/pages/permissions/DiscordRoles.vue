@@ -50,9 +50,9 @@ onMounted(async () => {
 
         <DataTable :value="groups" dataKey="_id" :sortField="sortField" :sortOrder="sortOrder" sortMode="single" @row-reorder="onRowReorder" responsiveLayout="scroll" class="p-datatable-sm">
 
+            <Column field="priority" header="Приоритет" sortable />
             <Column field="_id" header="ID" />
             <Column field="name" header="Название" />
-            <Column field="priority" header="Приоритет" sortable />
 
             <Column header="Синхронизация" bodyStyle="text-align:center; width:10rem">
                 <template #body="{ data }">
