@@ -340,8 +340,8 @@ onMounted(async () => {
             </Column>
 
             <Column field="priority" header="Приоритет" sortable headerStyle="width:5rem" />
-            <Column field="title" header="Название" sortable />
-            <Column field="_id" header="ID" sortable />
+            <Column field="title" header="Название" />
+            <Column field="_id" header="ID" />
 
             <Column header="Действия" bodyStyle="text-align:center; width:10rem">
                 <template #body="{ data }">

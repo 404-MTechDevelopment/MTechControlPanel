@@ -34,6 +34,7 @@
                     severity="secondary"
                     label="Sync"
                     rounded
+                    @click="sendSyncRequest(nickname.value)"
                 />
             </div>
             <div class="info-block" v-for="item in extraInfo" :key="item.label">
@@ -186,6 +187,22 @@ watchEffect(async () => {
         resetDataToDefaults()
     }
 })
+
+async function sendSyncRequest(targetNickname) {
+    try {
+        const response = await axios.post(`${config.baseURL}/admin/sync`, { target: targetNickname })
+        if (response.data?.success) {
+            toast.add({ severity: 'success', summary: 'Синхронизация', detail: 'Успешно выполнена' })
+            return true
+        } else {
+            toast.add({ severity: 'warn', summary: 'Синхронизация', detail: 'Не удалось синхронизировать' })
+            return false
+        }
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Ошибка при синхронизации' })
+        return false
+    }
+}
 
 function resetDataToDefaults() {
     data.money = 0
