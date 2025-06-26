@@ -13,6 +13,7 @@ import Tree from 'primevue/tree';
 import MultiSelect from 'primevue/multiselect';
 import { GroupService } from '@/service/GroupService';
 import { ForumGroupService } from '@/service/ForumGroupService';
+import { DiscordRolesService } from '@/service/DiscordRolesService';
 import CustomMultiSelect from '@/components/CustomMultiSelect.vue';
 
 const toast = useToast();
@@ -26,13 +27,15 @@ const editingGroup = reactive({
     title: '',
     priority: 0,
     permissions: [],
-    forumGroupsLinked: []
+    forumGroupsLinked: [],
+    discordGroupsLinked: [],
 });
 const permissionsTree = ref([]);
 const permissionSelection = ref({});
 const sortField = ref('priority');
 const sortOrder = ref(-1);
 const forumGroupOptions = ref([]);
+const discordRolesOptions = ref([]);
 
 const notify = (severity, summary, detail) => {
     toast.add({ severity, summary, detail, life: 2000 });
@@ -110,6 +113,18 @@ async function loadForumGroups() {
     }
 }
 
+async function loadDiscordGroups() {
+    try {
+        const list = await DiscordRolesService.getRoles();
+        if (Array.isArray(list)) {
+            discordRolesOptions.value = list.filter(item => item.syncable === true).sort((a, b) => b.priority - a.priority);
+        }
+    } catch (err) {
+        console.error(err);
+        notify('error', 'Ошибка', 'Не удалось загрузить список discord ролей');
+    }
+}
+
 function openEditDialog(group) {
     isCreateMode.value = false;
     Object.assign(editingGroup, {
@@ -117,7 +132,8 @@ function openEditDialog(group) {
         title: group.title,
         priority: group.priority,
         permissions: group.permissions || [],
-        forumGroupsLinked: group.forumGroupsLinked || []
+        forumGroupsLinked: group.forumGroupsLinked || [],
+        discordGroupsLinked: group.discordGroupsLinked || [],
     });
 
     permissionSelection.value = {};
@@ -139,6 +155,12 @@ function openEditDialog(group) {
     editingGroup.forumGroupsLinked.forEach((id) => {
         if (!forumGroupOptions.value.find((opt) => opt._id === id)) {
             forumGroupOptions.value.push({ _id: id, title: `Неизвестная (${id})`, priority: 0 });
+        }
+    });
+    editingGroup.discordGroupsLinked.forEach((id) => {
+        console.log("id: "+id)
+        if (!discordRolesOptions.value.find((opt) => opt._id === id)) {
+            discordRolesOptions.value.push({ _id: id, name: `${id}`, priority: 0 });
         }
     });
 
@@ -208,7 +230,8 @@ async function saveGroup() {
                 title: editingGroup.title,
                 priority: editingGroup.priority,
                 permissions: editingGroup.permissions,
-                forumGroupsLinked: editingGroup.forumGroupsLinked
+                forumGroupsLinked: editingGroup.forumGroupsLinked,
+                discordGroupsLinked: editingGroup.discordGroupsLinked,
             });
             notify('success', 'Сохранено', 'Группа создана');
         } else {
@@ -217,7 +240,8 @@ async function saveGroup() {
                 title: editingGroup.title,
                 priority: editingGroup.priority,
                 permissions: editingGroup.permissions,
-                forumGroupsLinked: editingGroup.forumGroupsLinked
+                forumGroupsLinked: editingGroup.forumGroupsLinked,
+                discordGroupsLinked: editingGroup.discordGroupsLinked,
             });
             const idx = groups.value.findIndex((g) => g._id === editingGroup._id);
             if (idx > -1) {
@@ -293,7 +317,7 @@ function handleDragOver(event) {
 }
 
 onMounted(async () => {
-    await Promise.all([loadGroups(), loadPermissionsTree(), loadForumGroups()]);
+    await Promise.all([loadGroups(), loadPermissionsTree(), loadForumGroups(), loadDiscordGroups()]);
 });
 </script>
 
@@ -377,6 +401,16 @@ onMounted(async () => {
                         optionLabel="title"
                         optionValue="_id"
                         placeholder="Выберите группы для привязки"
+                    />
+                </div>
+                <div class="field col-12 multiselect">
+                    <label class="text-lg font-semibold text-gray-400 mb-2 block">Discord-роли</label>
+                    <CustomMultiSelect
+                        v-model="editingGroup.discordGroupsLinked"
+                        :options="discordRolesOptions"
+                        optionLabel="name"
+                        optionValue="_id"
+                        placeholder="Выберите роли для привязки"
                     />
                 </div>
             </div>
