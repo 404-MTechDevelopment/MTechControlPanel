@@ -393,7 +393,7 @@ onMounted(async () => {
                     />
                 </div>
 
-                <div class="field col-12 multiselect">
+                <div class="field col-12">
                     <label class="text-lg font-semibold text-gray-400 mb-2 block">Форумные группы</label>
                     <CustomMultiSelect
                         v-model="editingGroup.forumGroupsLinked"
@@ -401,9 +401,10 @@ onMounted(async () => {
                         optionLabel="title"
                         optionValue="_id"
                         placeholder="Выберите группы для привязки"
+                        class="mytop"
                     />
                 </div>
-                <div class="field col-12 multiselect">
+                <div class="field col-12">
                     <label class="text-lg font-semibold text-gray-400 mb-2 block">Discord-роли</label>
                     <CustomMultiSelect
                         v-model="editingGroup.discordGroupsLinked"
@@ -411,6 +412,7 @@ onMounted(async () => {
                         optionLabel="name"
                         optionValue="_id"
                         placeholder="Выберите роли для привязки"
+                        class="mytop"
                     />
                 </div>
             </div>
@@ -488,5 +490,8 @@ onMounted(async () => {
 .mb-3
     margin-bottom: 1rem
 
+.mytop
+    border: 1px solid var(--p-inputtext-border-color)
+    border-radius: 6px
 </style>
 

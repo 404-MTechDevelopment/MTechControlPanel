@@ -25,7 +25,8 @@
             <transition name="fade" style="margin-top: 6px">
                 <div
                     v-if="dropdownOpen"
-                    class="fixed z-[9999] bg-black/100 rounded-lg shadow-xl max-h-60 overflow-y-auto transition-all duration-300 ease-in-out"
+                    ref="dropdownRef"
+                    class="custom-dropdown fixed z-[9999] bg-black/100 rounded-lg shadow-xl max-h-60 overflow-y-auto transition-all duration-300 ease-in-out"
                     :style="{
                         width: dropdownWidth + 'px',
                         top: dropdownTop + 'px',
@@ -80,6 +81,7 @@ const dropdownTop = ref(0)
 const dropdownLeft = ref(0)
 const search = ref('')
 const localValue = ref([...props.modelValue || []])
+const dropdownRef = ref(null)
 
 const toggleDropdown = async () => {
     dropdownOpen.value = !dropdownOpen.value
@@ -112,8 +114,15 @@ const emitValue = () => emit('update:modelValue', [...localValue.value])
 watch(() => props.modelValue, val => (localValue.value = [...val || []]))
 
 const handleClickOutside = (e) => {
-    if (!trigger.value?.contains(e.target)) dropdownOpen.value = false
+    const isInTrigger = trigger.value?.contains(e.target)
+    const isInDropdown = e.target.closest('.custom-dropdown') !== null
+
+    if (!isInTrigger && !isInDropdown) {
+        dropdownOpen.value = false
+    }
 }
+
+
 onMounted(() => document.addEventListener('click', handleClickOutside))
 onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 </script>
