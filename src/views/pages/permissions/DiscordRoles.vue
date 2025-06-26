@@ -27,12 +27,11 @@ async function loadGroups() {
     }
 }
 
-const sync = (data) => {
+const sync = async (data) => {
     try {
-        DiscordRolesService.setSyncable(data._id, data.syncable)
+        await DiscordRolesService.setSyncable(data._id, data.syncable)
         notify('success', 'Успех', 'Состояние роли обновлено');
-    }
-    catch (err) {
+    } catch (err) {
         notify('error', 'Ошибка', 'Не удалось обновить роль');
     }
 }
