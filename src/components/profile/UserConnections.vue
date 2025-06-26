@@ -246,7 +246,7 @@ function addHistory(entry: { maker: string; recipient: string; type: string; val
                     <Button type="button" icon="pi pi-filter-slash" label="Очистить" outlined @click="clearFilter" />
                     <div class="p-inputgroup">
                         <span class="p-inputgroup-addon"><i class="pi pi-search" /></span>
-                        <InputText v-model="filters.global.value" placeholder="Поиск по истории" />
+                        <InputText v-model="filters.global.value" style="margin-left: 10px" placeholder="Поиск по истории" />
                     </div>
                 </div>
             </template>
