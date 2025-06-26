@@ -23,7 +23,13 @@ const router = createRouter({
                 {
                     path: '/forum/groups',
                     name: 'forum-groups',
-                    component: () => import('@/views/pages/forum/ForumGroups.vue')
+                    component: () => import('@/views/pages/permissions/ForumGroups.vue')
+                },
+
+                {
+                    path: '/discord/roles',
+                    name: 'discord-roles',
+                    component: () => import('@/views/pages/permissions/DiscordRoles.vue')
                 },
 
                 {

@@ -18,5 +18,17 @@ export const DiscordRolesService = {
             console.error('getRoles error:', err);
             throw err;
         }
+    },
+    async setSyncable(role, state) {
+        try {
+            const res = await axios.get(`${config.baseURL}/discord/roles/set-syncable?role=${role}&state=${state}`);
+            console.log('setSyncable response:', res);
+            if (!res.data?.success) {
+                console.error('getRoles: unexpected response structure', res.data);
+            }
+        } catch (err) {
+            console.error('getRoles error:', err);
+            throw err;
+        }
     }
 };

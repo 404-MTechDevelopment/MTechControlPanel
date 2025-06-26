@@ -17,12 +17,10 @@ const model = ref([
     },
     {
         label: 'PERMISSIONS',
-        items: [{ label: 'Группы', icon: 'pi pi-fw pi-user', to: '/groups' }]
-    },
-    {
-        label: 'FORUM',
         items: [
-            { label: 'Форумные группы', icon: 'pi pi-fw pi-user', to: '/forum/groups' },
+            { label: 'Группы', icon: 'pi pi-fw pi-user', to: '/groups' },
+            { label: 'Форумные роли', icon: 'pi pi-fw pi-user', to: '/forum/groups' },
+            { label: 'Discord роли', icon: 'pi pi-fw pi-user', to: '/discord/roles' },
         ]
     },
     {
