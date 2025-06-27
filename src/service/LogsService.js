@@ -4,7 +4,7 @@ import { console } from 'vuedraggable/src/util/console';
 
 export const LogsService = {
     async getUserLogs(username) {
-        console.log('Getting Logs from', config.baseURL + '/admin/eco-logs/get-all');
+        console.log('Getting Logs from', `${config.baseURL}/admin/eco-logs/get-all?username=${username}`);
         try {
             const res = await axios.get(`${config.baseURL}/admin/eco-logs/get-all?username=${username}`);
             console.log('Getting Logs response:', res);
