@@ -63,6 +63,7 @@ export const GroupService = {
             const groupData = {
                 _id: group._id,
                 title: group.title,
+                type: group.type,
                 priority: group.priority || 0,
                 permissions: group.permissions || [],
                 forumGroupsLinked: group.forumGroupsLinked || [],
