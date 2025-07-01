@@ -34,7 +34,7 @@
                     severity="secondary"
                     label="Sync"
                     rounded
-                    @click="sendSyncRequest(nickname.value)"
+                    @click="sendSyncRequest(nickname)"
                 />
             </div>
             <div class="info-block" v-for="item in extraInfo" :key="item.label">
@@ -190,7 +190,9 @@ watchEffect(async () => {
 
 async function sendSyncRequest(targetNickname) {
     try {
-        const response = await axios.post(`${config.baseURL}/admin/sync`, { target: targetNickname })
+        const response = await axios.get(`${config.baseURL}/sync/sync-user?username=${targetNickname}`)
+        console.log(`${config.baseURL}/sync-user?username=${targetNickname}`)
+        console.log(response)
         if (response.data?.success) {
             toast.add({ severity: 'success', summary: 'Синхронизация', detail: 'Успешно выполнена' })
             return true
