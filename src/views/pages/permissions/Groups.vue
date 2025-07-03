@@ -30,6 +30,7 @@ const editingGroup = reactive({
     permissions: [],
     forumGroupsLinked: [],
     discordGroupsLinked: [],
+    displayOnSite: false,
 });
 const permissionsTree = ref([]);
 const permissionSelection = ref({});
@@ -136,6 +137,7 @@ function openEditDialog(group) {
         permissions: group.permissions || [],
         forumGroupsLinked: group.forumGroupsLinked || [],
         discordGroupsLinked: group.discordGroupsLinked || [],
+        displayOnSite: group.displayOnSite || false,
     });
     permissionSelection.value = {};
     const allNodes = flattenKeys(permissionsTree.value);
@@ -170,6 +172,7 @@ function openCreateDialog() {
         permissions: [],
         forumGroupsLinked: [],
         discordGroupsLinked: [],
+        displayOnSite: false,
     });
     permissionSelection.value = {};
     flattenKeys(permissionsTree.value).forEach(k => (permissionSelection.value[k] = { checked: false, partialChecked: false }));
@@ -212,6 +215,7 @@ async function saveGroup() {
             permissions: editingGroup.permissions,
             forumGroupsLinked: editingGroup.forumGroupsLinked,
             discordGroupsLinked: editingGroup.discordGroupsLinked,
+            displayOnSite: editingGroup.displayOnSite,
         });
         notify('success', 'Сохранено', isCreateMode.value ? 'Группа создана' : 'Группа обновлена');
         isDialogVisible.value = false;
@@ -253,6 +257,7 @@ async function saveOrder() {
             permissions: g.permissions || [],
             forumGroupsLinked: g.forumGroupsLinked || [],
             discordGroupsLinked: g.discordGroupsLinked || [],
+            displayOnSite: g.displayOnSite || false,
             type: g.type || 'server'
         })));
         notify('success', 'Сохранено', 'Порядок групп обновлён');
@@ -301,6 +306,7 @@ onMounted(() => Promise.all([loadGroups(), loadPermissionsTree(), loadForumGroup
             <Column field="title" header="Название" />
             <Column field="_id" header="ID" />
             <Column field="type" header="Тип" />
+            <Column field="displayOnSite" header="Display" />
             <Column header="Действия" bodyStyle="text-align:center; width:10rem">
                 <template #body="{ data }">
                     <Button icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm mr-2" @click="openEditDialog(data)" />
@@ -338,6 +344,11 @@ onMounted(() => Promise.all([loadGroups(), loadPermissionsTree(), loadForumGroup
                         class="w-full"
                         placeholder="Выберите тип"
                     />
+                </div>
+
+                <div class="field col-12">
+                    <label class="text-lg font-semibold text-gray-400 mb-2 block">Отображать на сайте?</label>
+                    <Checkbox binary id="checkOption1" name="option" value="true" v-model="editingGroup.displayOnSite" />
                 </div>
 
                 <div class="field col-12">
