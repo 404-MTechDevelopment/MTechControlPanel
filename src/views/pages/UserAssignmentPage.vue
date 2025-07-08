@@ -90,7 +90,7 @@
                             <img style="border-radius: 25%" :src="getHeadLink(user.name)" alt="User Avatar" class="user-avatar" />
                         </div>
                         <div class="user-info">
-                            <span class="user-name">{{ user.name }}</span>
+                            <span class="user-name" @click="goToUserProfile(user.name)">{{ user.name }}</span>
                             <span class="user-status">
                                 <i class="pi pi-shield"></i>
                                 {{ user.groups?.length || 0 }} ролей
@@ -270,6 +270,13 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import axios from 'axios';
 import { getHeadLink } from '@/api/getHeadLink';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+function goToUserProfile(username: string) {
+    router.push(`/profile/${encodeURIComponent(username)}`);
+}
 
 interface Server {
     id?: string;
@@ -949,6 +956,10 @@ onMounted(() => {
     display: block
     margin-bottom: 4px
     color: #ffffff
+    &:hover
+        cursor: pointer
+        color: #cdcdcd
+        transition: all 0.3s ease
 
 .user-status
     color: #708090
