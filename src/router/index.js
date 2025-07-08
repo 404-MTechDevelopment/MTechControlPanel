@@ -33,17 +33,6 @@ const router = createRouter({
                 },
 
                 {
-                    path: '/crew',
-                    name: 'crew',
-                    component: () => import('@/views/pages/crew/Crew.vue')
-                },
-                {
-                    path: '/crew-test',
-                    name: 'crew-test',
-                    component: () => import('@/views/pages/crew/CrewTest.vue')
-                },
-
-                {
                     path: '/imgur',
                     name: 'imgur',
                     component: () => import('@/views/pages/imgur/Imgur.vue')
@@ -153,9 +142,9 @@ const router = createRouter({
                     component: () => import('@/views/pages/logs/AssignLogs.vue')
                 },
                 {
-                    path: '/assignment',
-                    name: 'assignment',
-                    component: () => import('@/views/pages/UserAssignmentPage.vue')
+                    path: '/crew',
+                    name: 'crew',
+                    component: () => import('@/views/pages/CrewPage.vue')
                 },
                 {
                     path: '/documentation',

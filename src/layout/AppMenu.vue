@@ -11,8 +11,7 @@ const model = ref([
     {
         label: 'Персонал',
         items: [
-            { label: 'Список персонала', icon: 'pi pi-fw pi-home', to: '/crew' },
-            { label: 'Список персонала TEST', icon: 'pi pi-fw pi-home', to: '/crew-test' }
+            { label: 'Управление персоналом', icon: 'pi pi-fw pi-user', to: '/crew' }
         ]
     },
     {
