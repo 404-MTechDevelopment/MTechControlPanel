@@ -60,7 +60,6 @@
                         {{ server.name }}
                     </option>
                 </select>
-                <SelectButton>awkmdnjbhawjdk</SelectButton>
             </div>
         </div>
 
@@ -172,7 +171,7 @@
                         <label>Роль:</label>
                         <select v-model="selectedRole" class="role-dropdown">
                             <option disabled value="">Выберите роль</option>
-                            <option v-for="role in availableRoles" :key="role.id" :value="role.id">
+                            <option v-for="role in filteredAvailableRoles" :key="role.id" :value="role.id">
                                 {{ role.name }}
                             </option>
                         </select>
@@ -267,7 +266,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import axios from 'axios';
 import { getHeadLink } from '@/api/getHeadLink';
@@ -328,6 +327,15 @@ const removeReason = ref<string>('');
 const removeData = reactive({
     userName: '',
     roleName: ''
+});
+
+const filteredAvailableRoles = computed(() => {
+    if (!selectedUser.value || !selectedUser.value.groups) {
+        return availableRoles.value;
+    }
+
+    const userRoleIds = selectedUser.value.groups.map(group => group.node);
+    return availableRoles.value.filter(role => !userRoleIds.includes(role.id));
 });
 
 const showToast = (type: 'success' | 'error' | 'info', message: string) => {
@@ -476,8 +484,27 @@ const onServerChange = () => {
     }
 };
 
-const selectUserForAssignment = (user: User) => {
-    selectedUser.value = user;
+const selectUserForAssignment = async (user: User) => {
+    try {
+        if (selectedServer.value !== 'global') {
+            const response = await axios.get(`/api/crew/get-server-users?server=${selectedServer.value}`);
+            if (response.data.success) {
+                const serverUser = response.data.users?.find(u => u.name === user.username);
+                if (serverUser) {
+                    selectedUser.value = { ...user, groups: serverUser.groups };
+                } else {
+                    selectedUser.value = { ...user, groups: [] };
+                }
+            } else {
+                selectedUser.value = { ...user, groups: [] };
+            }
+        } else {
+            selectedUser.value = { ...user, groups: [] };
+        }
+    } catch (error) {
+        selectedUser.value = { ...user, groups: [] };
+    }
+
     selectedRole.value = '';
     assignReason.value = '';
     showAssignDialog.value = true;
