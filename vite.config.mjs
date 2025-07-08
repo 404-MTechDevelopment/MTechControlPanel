@@ -13,6 +13,11 @@ export default defineConfig({
                 target: 'https://test.nahon.top',
                 changeOrigin: true,
                 secure: false
+            },
+            '/img': {
+                target: 'https://test.nahon.top',
+                changeOrigin: true,
+                secure: false
             }
         }
     },

@@ -1,11 +1,66 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import axios, { AxiosProgressEvent } from 'axios'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import axios from 'axios'
 import FileUpload, { FileUploadUploadEvent } from 'primevue/fileupload'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
 
+// Состояние для массива изображений
+const images = ref<Array<{ authorName: string; imageId: string; ext: string }>>([])
+const loading = ref(false)
+const hasMore = ref(true)
+const page = ref(1)
+const limit = 20
+
+// Функция загрузки списка изображений с пагинацией
+async function loadImages() {
+    if (loading.value || !hasMore.value) return
+    loading.value = true
+
+    try {
+        const res = await axios.get(`/api/imgur/get?page=${page.value}`)
+        if (res.data && res.data.success && Array.isArray(res.data.images)) {
+            if (res.data.images.length === 0) {
+                hasMore.value = false
+            } else {
+                images.value = [...images.value, ...res.data.images]
+                page.value++
+            }
+        }
+    } catch (e) {
+        toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось получить список изображений',
+            life: 5000
+        })
+    } finally {
+        loading.value = false
+    }
+}
+
+// Подгрузка при скролле
+const handleScroll = () => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop
+    const scrollHeight = document.documentElement.scrollHeight
+    const clientHeight = window.innerHeight
+
+    if (scrollHeight - scrollTop <= clientHeight + 100) {
+        loadImages()
+    }
+}
+
+onMounted(() => {
+    loadImages()
+    window.addEventListener('scroll', handleScroll)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', handleScroll)
+})
+
+// Обработка загрузки новых файлов
 const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
     const files = event.files as File[]
     if (!files.length) {
@@ -13,7 +68,6 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
     }
 
     for (const file of files) {
-        // тост: начинаем этот файл
         toast.add({
             severity: 'info',
             summary: 'Загрузка',
@@ -26,13 +80,7 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
 
         try {
             await axios.post('/api/imgur/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-                onUploadProgress: (e: AxiosProgressEvent) => {
-                    if (e.total) {
-                        const pct = Math.round((e.loaded / e.total) * 100)
-                        console.log(`📊 ${file.name}: ${pct}%`)
-                    }
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             })
 
             toast.add({
@@ -41,8 +89,13 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
                 detail: `Файл ${file.name} загружен`,
                 life: 3000
             })
-        }
-        catch (err: any) {
+
+            // Сброс и обновление списка после успешной загрузки
+            images.value = []
+            page.value = 1
+            hasMore.value = true
+            await loadImages()
+        } catch (err: any) {
             console.error(`❌ Ошибка при загрузке ${file.name}:`, err)
             toast.add({
                 severity: 'error',
@@ -55,23 +108,35 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
 }
 </script>
 
-
 <template>
+    <div class="font-semibold text-xl mb-4">TabMenu</div>
+    <Tabs value="0">
+        <TabList>
+            <Tab value="0">Header I</Tab>
+            <Tab value="1">Header II</Tab>
+            <Tab value="2">Header III</Tab>
+        </TabList>
+    </Tabs>
     <div class="card">
         <div class="font-semibold text-xl mb-4">Advanced</div>
         <FileUpload name="demo[]" @uploader="onUpload" :multiple="true" accept="image/*" :maxFileSize="10000000" customUpload />
-    </div>
 
-    <div class="grid grid-cols-4 gap-4">
-        <img
-            v-for="i in 10000"
-            :key="i"
-            src="https://mtechlab.dev/imgur/3XgR9LChJy/"
-            alt="Image"
-            width="250"
-            loading="lazy"
-            class="w-60 h-auto object-cover"
-        />
+        <div class="grid grid-cols-4 gap-4 mt-6 place-items-center">
+            <img
+                v-for="img in images"
+                :key="img.imageId"
+                :src="`/img/${img.authorName}/${img._id}`"
+                :alt="img.imageId"
+                width="260"
+                loading="lazy"
+                class="h-auto object-cover"
+                style="border-radius: 15px"
+            />
+        </div>
+
+        <div v-if="loading" class="text-center my-4">
+            Загрузка...
+        </div>
     </div>
 </template>
 
