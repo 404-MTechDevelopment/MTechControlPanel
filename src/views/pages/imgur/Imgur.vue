@@ -2,16 +2,22 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import FileUpload, { FileUploadUploadEvent } from 'primevue/fileupload'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
 
 // Состояние для массива изображений
-const images = ref<Array<{ authorName: string; imageId: string; ext: string }>>([])
+const images = ref<Array<{ authorName: string; _id: string }>>([])
 const loading = ref(false)
 const hasMore = ref(true)
-const page = ref(1)
-const limit = 20
+const page = ref(0)
+
+// Модальное окно
+const showModal = ref(false)
+const selectedImageId = ref<string | null>(null)
+const selectedAuthor = ref<string | null>(null)
 
 // Функция загрузки списка изображений с пагинацией
 async function loadImages() {
@@ -63,9 +69,7 @@ onBeforeUnmount(() => {
 // Обработка загрузки новых файлов
 const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
     const files = event.files as File[]
-    if (!files.length) {
-        return
-    }
+    if (!files.length) return
 
     for (const file of files) {
         toast.add({
@@ -92,7 +96,7 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
 
             // Сброс и обновление списка после успешной загрузки
             images.value = []
-            page.value = 1
+            page.value = 0
             hasMore.value = true
             await loadImages()
         } catch (err: any) {
@@ -106,15 +110,31 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
         }
     }
 }
+
+// Открытие модалки
+const openImageModal = (img: { authorName: string; _id: string }) => {
+    selectedImageId.value = img._id
+    selectedAuthor.value = img.authorName
+    showModal.value = true
+}
+
+// Копирование ссылки в нужном формате
+const copyLink = (ext: string) => {
+    if (!selectedImageId.value || !selectedAuthor.value) return
+    const url = `${window.location.origin}/img/${selectedAuthor.value}/${selectedImageId.value}.${ext}`
+    navigator.clipboard.writeText(url).then(() => {
+        toast.add({ severity: 'success', summary: 'Скопировано', detail: `.${ext} ссылка скопирована`, life: 3000 })
+    })
+}
 </script>
 
 <template>
     <div class="font-semibold text-xl mb-4">TabMenu</div>
     <Tabs value="0">
         <TabList>
-            <Tab value="0">Header I</Tab>
-            <Tab value="1">Header II</Tab>
-            <Tab value="2">Header III</Tab>
+            <Tab value="0">Типа категория I</Tab>
+            <Tab value="1">Типа категория  II</Tab>
+            <Tab value="2">Типа категория  III</Tab>
         </TabList>
     </Tabs>
     <div class="card">
@@ -124,13 +144,14 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
         <div class="grid grid-cols-4 gap-4 mt-6 place-items-center">
             <img
                 v-for="img in images"
-                :key="img.imageId"
-                :src="`/img/${img.authorName}/${img._id}`"
-                :alt="img.imageId"
+                :key="img._id"
+                :src="`/img/${img.authorName}/${img._id}?preview=true`"
+                :alt="img._id"
                 width="260"
                 loading="lazy"
-                class="h-auto object-cover"
+                class="h-auto object-cover cursor-pointer"
                 style="border-radius: 15px"
+                @click="openImageModal(img)"
             />
         </div>
 
@@ -138,6 +159,16 @@ const onUpload = async (event: FileUploadUploadEvent): Promise<void> => {
             Загрузка...
         </div>
     </div>
+
+    <!-- Модальное окно -->
+    <Dialog v-model:visible="showModal" :style="{ width: '450px' }" header="Выберите формат и скопируйте ссылку" :modal="true">
+        <div class="flex flex-col space-y-3">
+            <Button label=".png" @click="copyLink('png')" />
+            <Button label=".jpg" @click="copyLink('jpg')" />
+            <Button label=".webp" @click="copyLink('webp')" />
+            <Button label=".gif" @click="copyLink('gif')" />
+        </div>
+    </Dialog>
 </template>
 
 <style scoped>
