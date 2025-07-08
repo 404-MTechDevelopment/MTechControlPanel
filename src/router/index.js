@@ -144,7 +144,7 @@ const router = createRouter({
                 {
                     path: '/crew',
                     name: 'crew',
-                    component: () => import('@/views/pages/CrewPage.vue')
+                    component: () => import('@/views/pages/crew/CrewPage.vue')
                 },
                 {
                     path: '/documentation',
