@@ -90,7 +90,7 @@
                             <img style="border-radius: 25%" :src="getHeadLink(user.name)" alt="User Avatar" class="user-avatar" />
                         </div>
                         <div class="user-info">
-                            <span class="user-name" @click="goToUserProfile(user.name)">{{ user.name }}</span>
+                            <span class="user-name" title="Перейти в профиль пользователя" @click="goToUserProfile(user.name)">{{ user.name }}</span>
                             <span class="user-status">
                                 <i class="pi pi-shield"></i>
                                 {{ user.groups?.length || 0 }} ролей
