@@ -7,6 +7,8 @@ import Button from 'primevue/button';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import { ForumGroupService } from '@/service/ForumGroupService';
+import axios from 'axios';
+import config from '@/config/config.json';
 
 const toast = useToast();
 
@@ -71,12 +73,33 @@ onMounted(async () => {
 });
 
 const getEditGroupLink = (groupId) => `https://forum.nahon.top/admin/?app=core&module=members&controller=groups&do=form&id=${groupId}`
+
+
+async function sendSyncAllForumUsersRequest() {
+    try {
+        const response = await axios.get(`${config.baseURL}/sync/sync-all-forum`)
+        if (response.data?.success) {
+            toast.add({ severity: 'success', summary: 'Синхронизация', detail: 'Успешно выполнена' })
+            return true
+        } else {
+            toast.add({ severity: 'warn', summary: 'Синхронизация', detail: 'Не удалось синхронизировать' })
+            return false
+        }
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Ошибка при синхронизации' })
+        return false
+    }
+}
 </script>
 
 <template>
     <div class="card p-fluid">
         <Toast />
         <ConfirmDialog />
+
+        <div class="mb-3" style="display:flex;justify-content:flex-end">
+            <Button label="Синхронизировать всех" icon="pi pi-sync" severity="primary" @click="sendSyncAllForumUsersRequest()" />
+        </div>
 
         <DataTable :value="groups" dataKey="_id" :sortField="sortField" :sortOrder="sortOrder" sortMode="single" @row-reorder="onRowReorder" responsiveLayout="scroll" class="p-datatable-sm">
             <Column rowReorder headerStyle="width:4rem" bodyStyle="text-align:center">

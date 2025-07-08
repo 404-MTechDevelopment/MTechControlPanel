@@ -1,18 +1,17 @@
 <script setup>
-import { CustomerService } from '@/service/CustomerService';
-import { ProductService } from '@/service/ProductService';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { onBeforeMount, reactive, ref } from 'vue';
+import { computed, onBeforeMount, reactive, ref } from 'vue';
 import { LogsService } from '@/service/LogsService';
+import { useRoute } from 'vue-router';
 
 const logs = ref([]); // Добавляем переменную для хранения логов
 const loading1 = ref(true); // Инициализируем loading1 как true
 const filters1 = ref(null);
-const expandedRows = ref([]);
+
+const route = useRoute();
 
 onBeforeMount(() => {
-    // Загружаем логи вместо данных о клиентах
-    LogsService.getUserLogs("asd")
+    LogsService.getUserLogs(computed(() => route.params.nickname || '').value)
         .then((data) => {
             logs.value = data;
             loading1.value = false;
