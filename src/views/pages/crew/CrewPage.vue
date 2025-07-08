@@ -545,7 +545,7 @@ const assignRole = async () => {
         };
 
         if (selectedServer.value === 'global') {
-            requestData.serverKey = '*';
+            requestData.server = '*';
             console.log('Global assignment request:', requestData);
         } else {
             requestData.server = selectedServer.value;
@@ -581,7 +581,7 @@ const confirmRemoveRole = async () => {
         };
 
         if (selectedServer.value === 'global') {
-            requestData.serverKey = '*';
+            requestData.server = '*';
         } else {
             requestData.server = selectedServer.value;
         }
