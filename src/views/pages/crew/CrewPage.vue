@@ -282,6 +282,7 @@ interface Server {
     id?: string;
     name?: string;
     value?: string;
+    title?: string;
 }
 
 interface User {
