@@ -112,7 +112,7 @@
                                 :title="`Приоритет: ${group.priority}`"
                             >
                                 <i :class="hoverStates[`${user.name}-${index}`] ? 'pi pi-times' : 'pi pi-shield'"></i>
-                                {{ group.node }}
+                                {{ group.title }}
                             </span>
                         </div>
                         <div v-else class="no-roles">
@@ -623,7 +623,7 @@ const closeRemoveDialog = () => {
 
 const getServerName = (serverId: string): string => {
     const server = servers.value.find(s => s.id === serverId || s.value === serverId);
-    return server ? server.name || serverId : serverId;
+    return server ? server.title || serverId : serverId;
 };
 
 onMounted(() => {
