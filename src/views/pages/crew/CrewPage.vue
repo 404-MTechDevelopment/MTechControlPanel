@@ -108,7 +108,7 @@
                                 class="role-tag"
                                 @mouseover="hoverStates[`${user.name}-${index}`] = true"
                                 @mouseleave="hoverStates[`${user.name}-${index}`] = false"
-                                @click="removeRole(user.name, group.node)"
+                                @click="removeRole(user.name || 'Неизвестный пользователь', group.node, group.title || 'Неизвестная роль')"
                                 :title="`Приоритет: ${group.priority}`"
                             >
                                 <i :class="hoverStates[`${user.name}-${index}`] ? 'pi pi-times' : 'pi pi-shield'"></i>
@@ -223,7 +223,7 @@
                         <label>Роль:</label>
                         <div class="selected-role">
                             <i class="pi pi-shield"></i>
-                            <span>{{ removeData.roleName }}</span>
+                            <span>{{ removeData.roleTitle }}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -297,6 +297,7 @@ interface Group {
     node: string;
     context: string;
     priority: number;
+    title: string;
 }
 
 interface Role {
@@ -334,7 +335,8 @@ const assignReason = ref<string>('');
 const removeReason = ref<string>('');
 const removeData = reactive({
     userName: '',
-    roleName: ''
+    roleName: '',
+    roleTitle: ''
 });
 
 const filteredAvailableRoles = computed(() => {
@@ -529,9 +531,10 @@ const addRoleToUser = (user: User) => {
     showAssignDialog.value = true;
 };
 
-const removeRole = (userName: string, roleName: string) => {
+const removeRole = (userName: string, roleName: string, roleTitle: string) => {
     removeData.userName = userName;
     removeData.roleName = roleName;
+    removeData.roleTitle = roleTitle;
     removeReason.value = '';
     showRemoveDialog.value = true;
 };
