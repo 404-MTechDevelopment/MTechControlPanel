@@ -57,7 +57,7 @@
                     <option disabled value="">Выберите сервер</option>
                     <option value="global">Глобально</option>
                     <option v-for="server in servers" :key="server.id || server.value" :value="server.id || server.value">
-                        {{ server.name }}
+                        {{ server.title }}
                     </option>
                 </select>
             </div>
