@@ -1,3 +1,6 @@
 {
-    "baseURL": "/api"
+    "baseURL": "/api",
+    "headers": {
+        "Content-Type": "application/json"
+    }
 }

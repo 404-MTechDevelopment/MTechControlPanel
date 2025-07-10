@@ -44,7 +44,6 @@ onMounted(async () => {
 
 <template>
     <div class="card p-fluid">
-        <Toast />
         <ConfirmDialog />
 
         <DataTable :value="groups" dataKey="_id" :sortField="sortField" :sortOrder="sortOrder" sortMode="single" @row-reorder="onRowReorder" responsiveLayout="scroll" class="p-datatable-sm">

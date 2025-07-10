@@ -1,10 +1,41 @@
 <script setup>
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { ref } from 'vue';
+import { AuthService } from '@/service/AuthService';
+import { useToast } from 'primevue/usetoast';
+import { useRoute, useRouter } from 'vue-router';
 
-const email = ref('');
+const login = ref('');
 const password = ref('');
 const checked = ref(false);
+
+const toast = useToast();
+const route = useRoute();
+const router = useRouter();
+
+function showError(title, message) {
+    toast.add({
+        severity: 'error',
+        summary: title,
+        detail: typeof message === 'string' ? message : JSON.stringify(message),
+        life: 3000
+    });
+}
+
+const loginUser = async () => {
+    try {
+        await AuthService.loginUser({
+            login: login.value,
+            password: password.value
+        })
+        const redirectTo = route.query.redirect || '/';
+        await router.push(redirectTo);
+    } catch (error) {
+        console.log(error);
+        console.log(error.response.data.error);
+        showError("Ошибка входа", error.response.data.error);
+    }
+}
 </script>
 
 <template>
@@ -31,25 +62,25 @@ const checked = ref(false);
                                 />
                             </g>
                         </svg>
-                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
-                        <span class="text-muted-color font-medium">Sign in to continue</span>
+                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Nahon Control Panel</div>
+                        <span class="text-muted-color font-medium">Войдите в аккаунт, чтобы продолжить</span>
                     </div>
 
                     <div>
-                        <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-                        <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8" v-model="email" />
+                        <label for="login1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Никнейм или Email</label>
+                        <InputText id="login1" type="text" placeholder="Никнейм или Email" class="w-full md:w-[30rem] mb-4" v-model="login" />
 
-                        <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-                        <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
+                        <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Пароль</label>
+                        <Password id="password1" v-model="password" placeholder="Пароль" :toggleMask="true" class="mb-6" fluid :feedback="false"></Password>
 
                         <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                             <div class="flex items-center">
                                 <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
-                                <label for="rememberme1">Remember me</label>
+                                <label for="rememberme1">Запомнить пароль</label>
                             </div>
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                         </div>
-                        <Button label="Sign In" class="w-full" as="router-link" to="/"></Button>
+                        <Button label="Войти" class="w-full" @click="loginUser"></Button>
                     </div>
                 </div>
             </div>

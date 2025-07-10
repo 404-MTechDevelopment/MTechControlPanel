@@ -286,7 +286,6 @@ onMounted(() => Promise.all([loadGroups(), loadPermissionsTree(), loadForumGroup
 
 <template>
     <div class="card p-fluid">
-        <Toast />
         <ConfirmDialog />
 
         <div class="mb-3" style="display:flex;justify-content:flex-end">

@@ -94,7 +94,6 @@ async function sendSyncAllForumUsersRequest() {
 
 <template>
     <div class="card p-fluid">
-        <Toast />
         <ConfirmDialog />
 
         <div class="mb-3" style="display:flex;justify-content:flex-end">
