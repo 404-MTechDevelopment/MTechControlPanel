@@ -390,6 +390,7 @@ const fetchServers = async () => {
                     return {
                         id: server.id || server.value || server.name,
                         name: server.name || server.id || server.value,
+                        title: server.title,
                         value: server.id || server.value || server.name
                     };
                 });
