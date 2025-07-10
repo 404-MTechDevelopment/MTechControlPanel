@@ -16,7 +16,7 @@ onMounted(async () => {
 
     if (!authStore.user && !isLoginPage) {
         await router.replace({
-            path: '/admin/login',
+            path: '/auth/login',
             query: { redirect: route.fullPath }
         });
     }
