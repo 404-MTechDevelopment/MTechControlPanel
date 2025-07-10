@@ -1,14 +1,17 @@
 {
     "compilerOptions": {
-        "target": "es2015",
+        "target": "es2017",
+        "lib": ["es2017", "dom"],
         "module": "esnext",
         "moduleResolution": "node",
-        "lib": ["es2015", "dom"],
-        "paths": {
-            "@/*": ["./src/*"]
-        },
         "esModuleInterop": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "strict": true,
+        "jsx": "preserve",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        }
     },
     "exclude": ["node_modules", "dist"]
 }

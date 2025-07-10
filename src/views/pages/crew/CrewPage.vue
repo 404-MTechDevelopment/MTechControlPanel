@@ -494,31 +494,33 @@ const onServerChange = () => {
 };
 
 const selectUserForAssignment = async (user: User) => {
+    let groups: Group[] = [];
+
     try {
         if (selectedServer.value !== 'global') {
             const response = await axios.get(`/api/crew/get-server-users?server=${selectedServer.value}`);
             if (response.data.success) {
                 const serverUser = response.data.users?.find(u => u.name === user.username);
-                if (serverUser) {
-                    selectedUser.value = { ...user, groups: serverUser.groups };
-                } else {
-                    selectedUser.value = { ...user, groups: [] };
+                if (serverUser?.groups) {
+                    groups = serverUser.groups.map((name: string) => ({
+                        node: name,
+                        context: '',
+                        priority: 0,
+                    }));
                 }
-            } else {
-                selectedUser.value = { ...user, groups: [] };
             }
-        } else {
-            selectedUser.value = { ...user, groups: [] };
         }
     } catch (error) {
-        selectedUser.value = { ...user, groups: [] };
+        console.error(error)
     }
 
+    selectedUser.value = { ...user, groups };
     selectedRole.value = '';
     assignReason.value = '';
     showAssignDialog.value = true;
     showSearchDropdown.value = false;
 };
+
 
 const addRoleToUser = (user: User) => {
     selectedUser.value = { ...user, username: user.name };
