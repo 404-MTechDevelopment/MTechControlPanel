@@ -559,7 +559,7 @@ const assignRole = async () => {
                 fetchServerUsers(selectedServer.value);
             }
         } else {
-            showToast('error', 'Ошибка назначения роли');
+            showToast('error', response.data.error ? response.data.error : 'Ошибка назначения роли');
         }
     } catch (error) {
         console.error('Ошибка назначения роли:', error);
