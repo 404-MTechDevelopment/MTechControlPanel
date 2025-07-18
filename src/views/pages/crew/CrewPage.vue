@@ -3,7 +3,7 @@
         <div class="info-block">
             <i class="pi pi-users" style="font-size: 2rem; color: #708090; border-radius: 10px"></i>
             <div class="id_id-text">
-                <p class="id-text">Назначение пользователей</p>
+                <p class="id-text">Назначение персонала</p>
             </div>
         </div>
 
@@ -14,7 +14,7 @@
                     <input
                         v-model="searchQuery"
                         type="text"
-                        placeholder="Поиск пользователей..."
+                        placeholder="Поиск персонала..."
                         class="search-input"
                         :disabled="!selectedServer"
                         @input="searchUsers"
@@ -38,7 +38,7 @@
                     <div v-else-if="!searchLoading && searchQuery.length !== 0 && isFocused" class="search-results-dropdown">
                         <div class="search-result-item no-results">
                             <i class="pi pi-exclamation-triangle"></i>
-                            <span class="not-found">Пользователи не найдены</span>
+                            <span class="not-found">Персонал не найден</span>
                         </div>
                     </div>
                     <div v-if="searchLoading" class="search-loading">
@@ -67,14 +67,14 @@
             <div class="loading-spinner">
                 <i class="pi pi-spin pi-spinner"></i>
             </div>
-            <span>Загрузка пользователей сервера...</span>
+            <span>Загрузка персонала сервера...</span>
         </div>
 
-        <div v-else-if="selectedServer && selectedServer !== 'global'" class="server-users">
+        <div v-else-if="selectedServer" class="server-users">
             <div class="section-header">
                 <div class="section-title">
                     <i class="pi pi-users"></i>
-                    <span>Пользователи сервера {{ getServerName(selectedServer) }}</span>
+                    <span>{{ getServerName(selectedServer) == 'global' ? "Персонал проекта" : "Персонал сервера "+getServerName(selectedServer) }}</span>
                 </div>
                 <div class="users-count">{{ serverUsers.length }} пользователей</div>
             </div>
@@ -126,9 +126,9 @@
             <div v-else class="empty-state">
                 <div class="empty-icon">
                     <i class="pi pi-users"></i>
-                </div>
-                <h3>Нет пользователей в составе</h3>
-                <p>На сервере {{ getServerName(selectedServer) }} пока нет пользователей с назначенными ролями</p>
+                </div>Нет поль
+                <h3>зователей в составе</h3>
+                <p>На сервере {{ getServerName(selectedServer) }} пока нет персонала с назначенными ролями</p>
             </div>
         </div>
 
@@ -138,14 +138,6 @@
             </div>
             <h3>Выберите сервер</h3>
             <p>Для начала работы выберите сервер из списка выше</p>
-        </div>
-
-        <div v-else-if="selectedServer === 'global'" class="global-mode-state">
-            <div class="global-icon">
-                <i class="pi pi-globe"></i>
-            </div>
-            <h3>Глобальный режим</h3>
-            <p>Используйте поиск для назначения глобальных ролей пользователям</p>
         </div>
 
         <div v-if="showAssignDialog" class="modal-overlay" @click="closeAssignDialog">
@@ -161,7 +153,7 @@
                 </div>
                 <div class="assign-form">
                     <div class="form-group">
-                        <label>Пользователь:</label>
+                                                                                                                                    <label>Пользователь:</label>
                         <div class="selected-user">
                             <i class="pi pi-user"></i>
                             <span>{{ selectedUser?.username || selectedUser?.name }}</span>
@@ -413,7 +405,7 @@ const fetchServers = async () => {
 const fetchServerUsers = async (serverId: string) => {
     serverUsersLoading.value = true;
     try {
-        const response = await axios.get(`/api/crew/get-server-users?server=${serverId}`);
+        const response = await axios.get(`/api/crew/get-users?server=${serverId}`);
 
         if (response.data.success) {
             serverUsers.value = response.data.users || [];
@@ -488,7 +480,7 @@ const onServerChange = () => {
 
     fetchAvailableRoles(selectedServer.value);
 
-    if (selectedServer.value && selectedServer.value !== 'global') {
+    if (selectedServer.value && selectedServer.value) {
         fetchServerUsers(selectedServer.value);
     } else {
         serverUsers.value = [];
@@ -499,8 +491,8 @@ const selectUserForAssignment = async (user: User) => {
     let groups: Group[] = [];
 
     try {
-        if (selectedServer.value !== 'global') {
-            const response = await axios.get(`/api/crew/get-server-users?server=${selectedServer.value}`);
+        if (selectedServer.value) {
+            const response = await axios.get(`/api/crew/get-users?server=${selectedServer.value}`);
             if (response.data.success) {
                 const serverUser = response.data.users?.find(u => u.name === user.username);
                 if (serverUser?.groups) {
@@ -563,7 +555,7 @@ const assignRole = async () => {
         if (response.data.success) {
             showToast('success', `Роль "${selectedRole.value}" успешно назначена пользователю ${selectedUser.value.username || selectedUser.value.name}`);
             closeAssignDialog();
-            if (selectedServer.value !== 'global') {
+            if (selectedServer.value) {
                 fetchServerUsers(selectedServer.value);
             }
         } else {
@@ -598,7 +590,7 @@ const confirmRemoveRole = async () => {
         if (response.data.success) {
             showToast('success', `Роль "${removeData.roleName}" успешно снята с пользователя ${removeData.userName}`);
             closeRemoveDialog();
-            if (selectedServer.value !== 'global') {
+            if (selectedServer.value) {
                 fetchServerUsers(selectedServer.value);
             }
         } else {
