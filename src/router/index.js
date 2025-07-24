@@ -147,6 +147,11 @@ const router = createRouter({
                     component: () => import('@/views/pages/crew/CrewPage.vue')
                 },
                 {
+                    path: '/passgen',
+                    name: 'passgen',
+                    component: () => import('@/views/pages/PasswordGenerator.vue')
+                },
+                {
                     path: '/documentation',
                     name: 'documentation',
                     component: () => import('@/views/pages/Documentation.vue')
