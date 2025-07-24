@@ -24,7 +24,10 @@ const model = ref([
     },
     {
         label: 'Сайт',
-        items: [{ label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' }]
+        items: [
+                { label: 'IMGUR', icon: 'pi pi-fw pi-images', to: '/imgur' },
+            { label: 'Редактор новостей', icon: 'pi pi-fw pi-images', to: '/news' },
+        ]
     },
     {
         label: 'Home-old',
