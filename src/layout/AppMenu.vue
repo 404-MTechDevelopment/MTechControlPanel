@@ -30,6 +30,12 @@ const model = ref([
         ]
     },
     {
+        label: 'Утилиты',
+        items: [
+            { label: 'Генератор паролей', icon: 'pi pi-fw pi-key', to: '/passgen' },
+        ]
+    },
+    {
         label: 'Home-old',
         items: [{ label: 'Dashboard-old', icon: 'pi pi-fw pi-home', to: '/uikit/dashboard' }]
     },
