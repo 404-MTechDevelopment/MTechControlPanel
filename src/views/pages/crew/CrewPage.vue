@@ -25,7 +25,7 @@
                         <div v-for="user in searchResults" :key="user.uuid" class="search-result-item" @click="selectUserForAssignment(user)">
                             <div class="user-info">
                                 <div class="user-avatar">
-                                    <img style="border-radius: 25%" :src="getHeadLink(user.uuid)" alt="User Avatar" class="user-avatar" />
+                                    <img style="border-radius: 25%" :src="getHeadLink(user.username)" alt="User Avatar" class="user-avatar" />
                                 </div>
                                 <div class="user-details">
                                     <span class="user-name">{{ user.username }}</span>
@@ -87,7 +87,7 @@
                 >
                     <div class="user-header">
                         <div class="user-avatar">
-                            <img style="border-radius: 25%" :src="getHeadLink(user.uuid)" alt="User Avatar" class="user-avatar" />
+                            <img style="border-radius: 25%" :src="getHeadLink(user.name)" alt="User Avatar" class="user-avatar" />
                         </div>
                         <div class="user-info">
                             <span class="user-name" title="Перейти в профиль пользователя" @click="goToUserProfile(user.name)">{{ user.name }}</span>

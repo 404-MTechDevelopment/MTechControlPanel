@@ -42,7 +42,7 @@ const { toggleMenu } = useLayout();
             </div>
 
             <button type="button" class="layout-topbar-action">
-                <img style="border-radius: 25%" v-if="checkAuth?.uuid" :src="getHeadLink(checkAuth.uuid)" alt="Head" class="layout-topbar-avatar" />
+                <img style="border-radius: 25%" v-if="checkAuth?.username" :src="getHeadLink(checkAuth.username)" alt="Head" class="layout-topbar-avatar" />
             </button>
         </div>
     </div>
