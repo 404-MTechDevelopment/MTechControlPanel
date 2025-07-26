@@ -52,7 +52,7 @@ const route = useRoute();
 const toast = useToast();
 
 const nickname = computed(() => route.params.nickname || '');
-const headLink = computed(() => getHeadLink(nickname.value));
+const headLink = ref('');
 const loading = ref(false);
 const userExists = ref(false);
 const userInfo = ref(null);
@@ -76,6 +76,7 @@ watchEffect(async () => {
     loading.value = true;
     try {
         userInfo.value = await getUserInfo(nickname.value);
+        headLink.value = getHeadLink(userInfo.value.uuid);
         userExists.value = true;
     } catch (e) {
         if (e.response?.data?.error === 'user not found') {
