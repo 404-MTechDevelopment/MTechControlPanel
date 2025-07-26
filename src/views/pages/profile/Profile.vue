@@ -4,7 +4,7 @@
         <div v-else>
             <div v-if="userExists">
                 <div class="player-info">
-                    <img :src="headLink" alt="head" />
+                    <img style="width: 43px; height: 43px" :src="headLink" alt="head" />
                     <h1 class="nickname">{{ nickname }}</h1>
                 </div>
 
