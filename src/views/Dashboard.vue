@@ -51,7 +51,7 @@ function openUserProfile(nickname) {
             <input v-model="query" @focus="isFocused = true" @blur="isFocused = false" @input="fetchResults" type="text" placeholder="Поиск игроков..." class="search-input" autocomplete="off" spellcheck="false" />
             <transition-group name="list-fade" tag="ul" v-if="showDropdown && results.length" class="results-dropdown">
                 <li v-for="user in results" :key="user.uuid" class="result-item" @click="openUserProfile(user.username)">
-                    <img style="border-radius: 25%" :src="getHeadLink(user.username)" alt="User Avatar" class="user-avatar" />
+                    <img style="border-radius: 25%" :src="getHeadLink(user.uuid)" alt="User Avatar" class="user-avatar" />
                     <span class="username">{{ user.username }}</span>
                     <span class="email">{{ user.email }}</span>
                 </li>
